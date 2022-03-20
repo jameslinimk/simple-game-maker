@@ -6,7 +6,7 @@
 
 	let email: string;
 	let username: string;
-	$: if (username) username = username.replace(/[^A-Za-z0-9_'"-]+/g, "");
+	$: if (username) username = username.replace(/[ ]+/g, "_").replace(/[^A-Za-z0-9_'"-]+/g, "");
 	let password: string;
 
 	const submit = async () => {
@@ -60,6 +60,21 @@
 
 <div class="h-full m-0 left-0 top-0 fixed w-full flex justify-center items-center">
 	<div class="grid place-items-center bg-slate-700 h-fit rounded-md p-5 gap-2 w-96 shadow-md shadow-black">
+		<div class="flex gap-2">
+			<div class="capitalize text-3xl font-semibold text-white bg-slate-800 pr-2 pl-2 rounded-md shadow-black shadow-sm inline-block">{type}</div>
+			<button
+				on:click={() => {
+					type = type === "signin" ? "signup" : "signin";
+					emailError = false;
+					passwordError = false;
+					usernameError = false;
+				}}
+				class="bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
+			>
+				{type === "signin" ? "Create an account" : "Sign in to existing account"}
+			</button>
+		</div>
+
 		{#if generalError}
 			<div class="text-[#f56565] text-xl mt-1 font-bold">{generalError}</div>
 		{/if}
@@ -68,9 +83,10 @@
 			<label for="username" class="text-2xl font-semibold text-white w-full">
 				<div class="mb-1">Username</div>
 				<input
-					type="username"
+					type="text"
 					id="username"
-					placeholder="xx_myepixusername_xx"
+					placeholder="my_epic_username-2"
+					maxlength="25"
 					class="shadow-md shadow-black rounded-sm text-black text-md pb-1 pl-1 pr-1 focus:scale-[1.05] transition-all duration-300 w-full {usernameError ? 'border-[#f56565] border-2' : ''}"
 					bind:value={username}
 					on:input={() => (usernameError = false)}
@@ -101,7 +117,7 @@
 			<input
 				type="password"
 				id="password"
-				placeholder="*******"
+				placeholder="********"
 				class="shadow-md shadow-black rounded-sm text-black text-md pb-1 pl-1 pr-1 focus:scale-[1.05] transition-all duration-300 w-full {passwordError ? 'border-[#f56565] border-2' : ''}"
 				bind:value={password}
 				on:input={() => (passwordError = false)}
@@ -112,20 +128,17 @@
 		</label>
 
 		<div>
-			<button on:click={submit} class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-2xl rounded-md shadow-lg font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300">
+			<button
+				on:click={submit}
+				class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-2xl rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
+			>
 				Submit
 			</button>
-			<button
-				on:click={() => {
-					type = type === "signin" ? "signup" : "signin";
-					emailError = false;
-					passwordError = false;
-					usernameError = false;
-				}}
-				class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-lg font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
-			>
-				{type === "signin" ? "Create an account" : "Sign in to existing account"}
-			</button>
+			{#if type === "signin"}
+				<button class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300">
+					Forgot your password?
+				</button>
+			{/if}
 		</div>
 	</div>
 </div>

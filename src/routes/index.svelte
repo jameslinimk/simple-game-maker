@@ -149,7 +149,7 @@
 
 		<div class="absolute flex flex-col top-2 right-2 gap-1">
 			<button
-				class="bg-slate-500 rounded-2xl shadow-lg shadow-black w-8 h-8 relative {burgerMenuOpen
+				class="bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 relative {burgerMenuOpen
 					? 'opacity-80'
 					: 'opacity-40'} hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 group z-20"
 				on:click={() => (burgerMenuOpen = !burgerMenuOpen)}
@@ -175,7 +175,7 @@
 				</div>
 			</button>
 			<button
-				class="bg-slate-500 rounded-2xl shadow-lg shadow-black w-8 h-8 relative opacity-40 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
+				class="bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 relative opacity-40 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
 				on:click={play}
 			>
 				{#if playButtonLoading}
@@ -194,11 +194,11 @@
 		</div>
 	</div>
 
-	<div class="cursor-ew-resize w-2 bg-slate-300 dark:bg-slate-600 shadow-lg shadow-black" id="resizer1" data-direction="horizontal" />
+	<div class="cursor-ew-resize w-2 bg-slate-300 dark:bg-slate-600 shadow-sm shadow-black z-50" id="resizer1" data-direction="horizontal" />
 
 	<div style="display: flex; flex: 1 1 0%; flex-direction: column">
 		<div class="bg-slate-100 dark:bg-slate-700 h-3/4 grid place-items-center text-2xl font-semibold text-black dark:text-white">Right</div>
-		<div id="resizer2" class="h-2 bg-slate-400 dark:bg-slate-500 shadow-lg shadow-black cursor-ns-resize" data-direction="vertical" />
+		<div id="resizer2" class="h-2 bg-slate-400 dark:bg-slate-500 shadow-sm shadow-black cursor-ns-resize z-40" data-direction="vertical" />
 		<div class="bg-slate-100 dark:bg-slate-700 flex-1 text-2xl font-semibold text-black dark:text-white overflow-auto">
 			<ConsoleOutput {consoleOutput} bind:autoScroll={consoleOutputAutoScroll} />
 		</div>
