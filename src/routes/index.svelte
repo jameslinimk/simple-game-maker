@@ -1,15 +1,15 @@
 <script lang="ts">
 	import ConsoleOutput from "$lib/consoleOutput.svelte";
+	import execute from "$lib/execute";
+	import sGame, { running } from "$lib/game/sGame";
 	import OptionMenu from "$lib/optionMenu.svelte";
 	import resizeable from "$lib/resizeable";
 	import { themeData, themeLightOrDark } from "$lib/themeData";
 	import type { Ace } from "ace-builds";
+	import { format } from "prettier";
+	import parserBabel from "prettier/esm/parser-babel.mjs";
 	import { onMount } from "svelte";
 	import { fade } from "svelte/transition";
-
-	interface NewConsole extends Console {
-		oldLog(...data: any[]): void;
-	}
 
 	let editor: Ace.Editor;
 	onMount(async () => {
@@ -32,10 +32,11 @@
 			wrap: true,
 		});
 		(<any>editor.session.on)("changeMode", (_: any, session: any) => {
-			session.$worker.send("setOptions", [
+			session.$worker.send("changeOptions", [
 				{
 					esversion: 9,
 					esnext: false,
+					asi: true,
 				},
 			]);
 		});
@@ -65,25 +66,6 @@
 	});
 
 	let burgerMenuOpen = false;
-	let playButtonLoading = false;
-
-	// Custom console output for play
-	let consoleOutput: any[] = [{ newConsoleOutput: true, date: Date.now() }];
-	(<NewConsole>console).oldLog = console.log;
-	console.log = (...data: any[]) => (consoleOutput = [...consoleOutput, data]);
-
-	// MAIN EXECUTE FUNCTION
-	const play = async () => {
-		if (playButtonLoading) return;
-
-		// Differencitate the new console logs from the later ones
-		consoleOutput = [...consoleOutput, { newConsoleOutput: true, date: Date.now() }];
-
-		// TODO Eval doesnt wait till async
-		playButtonLoading = true;
-		await eval(editor.getValue());
-		playButtonLoading = false;
-	};
 
 	let currentTheme = "one_dark";
 	const toggleTheme = (theme: string) => {
@@ -106,6 +88,35 @@
 	};
 
 	let consoleOutputAutoScroll: boolean;
+
+	let consoleOutput: any[] = [{ newConsoleOutput: true, date: Date.now() }];
+	const play = async () => {
+		if ($running) {
+			sGame.stop();
+			return;
+		}
+
+		consoleOutput = [...consoleOutput, ...(await execute(editor.getValue()))];
+	};
+
+	/**
+	 * https://prettier.io/docs/en/options.html#parser
+	 */
+	const prettierFormat = {
+		useTabs: true,
+		semi: false,
+	};
+
+	const formatCode = () => {
+		if (editor.session.getAnnotations().filter((annotation) => annotation.type === "error").length > 0) return;
+		editor.session.setValue(
+			format(editor.getValue(), {
+				...prettierFormat,
+				parser: "babel",
+				plugins: [parserBabel],
+			})
+		);
+	};
 </script>
 
 <div class="absolute top-0 right-0 bottom-0 left-0 flex">
@@ -128,12 +139,24 @@
 								},
 								true,
 							],
+							[
+								"Semicolons",
+								(on) => {
+									editor.session.$worker.send("changeOptions", [
+										{
+											asi: !on,
+										},
+									]);
+									prettierFormat.semi = on;
+								},
+								false,
+							],
 						],
 						dropdownOptions: [
 							["Select theme", themeData.map((theme) => [`${theme[2] === "dark" ? "🌑" : "☀"} - ${theme[0]}`, theme[1]]), toggleTheme, currentTheme],
 							[
 								"Font size",
-								[8, 12, 24, 32, 40].map((size) => [`${size}${size === 12 ? " (deafult)" : ""}`, `${size}`]),
+								[8, 10, 12, 14, 16, 18, 20, 22, 24].map((size) => [`${size}${size === 12 ? " (deafult)" : ""}`, `${size}`]),
 								(size) => changeEditorFontSize(parseInt(size)),
 								`${currentFontSize}`,
 							],
@@ -147,14 +170,13 @@
 			/>
 		{/if}
 
-		<div class="absolute flex flex-col top-2 right-2 gap-1">
+		<div class="absolute flex flex-col top-2 right-2 gap-1 items-end">
 			<button
 				class="bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 relative {burgerMenuOpen
 					? 'opacity-80'
 					: 'opacity-40'} hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 group z-20"
 				on:click={() => (burgerMenuOpen = !burgerMenuOpen)}
 			>
-				<span class="sr-only">Open main menu</span>
 				<div class="block w-5 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
 					<span
 						aria-hidden="true"
@@ -175,11 +197,11 @@
 				</div>
 			</button>
 			<button
-				class="bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 relative opacity-40 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
+				class="bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 relative opacity-40 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center "
 				on:click={play}
 			>
-				{#if playButtonLoading}
-					<svg in:fade class="animate-spin h-5 w-5 text-white dark:text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+				{#if $running}
+					<svg class="animate-spin h-5 w-5 text-white dark:text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 						<circle class="opacity-50" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
 						<path class="opacity-100" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
 					</svg>
@@ -191,15 +213,33 @@
 					</div>
 				{/if}
 			</button>
+			<button
+				on:click={formatCode}
+				class="bg-slate-500 shadow-sm shadow-black rounded-2xl opacity-40 p-1 text-white dark:text-black hover:opacity-80 hover:rounded-lg hover:scale-[1.1] transition-all duration-300"
+			>
+				Format
+			</button>
 		</div>
 	</div>
 
-	<div class="cursor-ew-resize w-2 bg-slate-300 dark:bg-slate-600 shadow-sm shadow-black z-50" id="resizer1" data-direction="horizontal" />
+	<div class="cursor-ew-resize w-2 bg-slate-300 dark:bg-slate-600 z-50" id="resizer1" data-direction="horizontal" />
 
 	<div style="display: flex; flex: 1 1 0%; flex-direction: column">
-		<div class="bg-slate-100 dark:bg-slate-700 h-3/4 grid place-items-center text-2xl font-semibold text-black dark:text-white">Right</div>
-		<div id="resizer2" class="h-2 bg-slate-400 dark:bg-slate-500 shadow-sm shadow-black cursor-ns-resize z-40" data-direction="vertical" />
-		<div class="bg-slate-100 dark:bg-slate-700 flex-1 text-2xl font-semibold text-black dark:text-white overflow-auto">
+		<div class="bg-slate-100 dark:bg-slate-700 h-3/4 grid place-items-center text-2xl font-semibold text-black dark:text-white">
+			<canvas id="gameCanvas" class="w-full h-full" bind:this={sGame.canvas} />
+		</div>
+		<button
+			on:click={() => {
+				sGame.start();
+			}}>Start</button
+		>
+		<button
+			on:click={() => {
+				sGame.stop();
+			}}>Stop</button
+		>
+		<div id="resizer2" class="h-2 bg-slate-400 dark:bg-slate-500 cursor-ns-resize z-40" data-direction="vertical" />
+		<div class="bg-slate-100 dark:bg-gray-800 flex-1 text-2xl font-semibold text-black dark:text-white overflow-auto">
 			<ConsoleOutput {consoleOutput} bind:autoScroll={consoleOutputAutoScroll} />
 		</div>
 	</div>

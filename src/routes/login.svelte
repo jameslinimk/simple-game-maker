@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { auth } from "$lib/firebase";
-	import { createUserWithEmailAndPassword } from "firebase/auth";
+	import { addProject, auth, getUserData, overrideUserData, updateUserData } from "$lib/firebase";
+	import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 	let type: "signin" | "signup" = "signup";
 
@@ -10,10 +10,21 @@
 	let password: string;
 
 	const submit = async () => {
-		console.log("submitted");
-
 		if (type === "signup" && !username) {
-			usernameError = "Plesae type an username!";
+			usernameError = "Plesae enter an username!";
+			return;
+		}
+		if (!email) {
+			emailError = "Please enter an email!";
+			return;
+		}
+		if (!password) {
+			passwordError = "Please enter a password!";
+			return;
+		}
+
+		if (username.length > 25) {
+			usernameError = `Username must be less than 25 characters! (${username.length - 25} characters over)`;
 			return;
 		}
 
@@ -22,16 +33,31 @@
 			return;
 		}
 
-		if (!email) {
-			emailError = "Please type an email!";
-			return;
-		}
-		if (!password) {
-			passwordError = "Please type a password!";
-			return;
+		if (type === "signup") {
+			const credential = await createUserWithEmailAndPassword(auth, email, password).catch((error) => {
+				// const code: string = error.code;
+				const msg: string = error.message;
+
+				if (msg.toLowerCase().includes("email")) {
+					emailError = msg;
+					return;
+				}
+
+				if (msg.toLowerCase().includes("password")) {
+					passwordError = msg;
+					return;
+				}
+
+				generalError = msg;
+				return;
+			});
+			if (!credential) return;
+			await overrideUserData({ username: username });
+			console.log("Logged in!");
+			return true;
 		}
 
-		const credential = await createUserWithEmailAndPassword(auth, email, password).catch((error) => {
+		const credential = signInWithEmailAndPassword(auth, email, password).catch((error) => {
 			// const code: string = error.code;
 			const msg: string = error.message;
 
@@ -50,6 +76,7 @@
 		});
 		if (!credential) return;
 		console.log("Logged in!");
+		return true;
 	};
 
 	let emailError: false | string = false;
@@ -140,5 +167,40 @@
 				</button>
 			{/if}
 		</div>
+	</div>
+
+	<div class="grid place-items-center bg-slate-700 h-fit rounded-md p-5 gap-2 shadow-md shadow-black ml-2">
+		<button
+			class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
+			on:click={async () => {
+				console.log(await getUserData());
+			}}
+		>
+			User info
+		</button>
+		<button
+			class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
+			on:click={async () => {
+				console.log(await updateUserData({ test: false }));
+			}}
+		>
+			Set test
+		</button>
+		<button
+			class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
+			on:click={() => {
+				console.log("epico");
+			}}
+		>
+			Update test
+		</button>
+		<button
+			class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
+			on:click={async () => {
+				console.log(await addProject("testName", 'console.log("hey")'));
+			}}
+		>
+			Add project
+		</button>
 	</div>
 </div>

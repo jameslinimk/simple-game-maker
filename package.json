@@ -8,12 +8,15 @@
     "preview": "svelte-kit preview",
     "prepare": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
+    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "next",
     "@sveltejs/kit": "next",
+    "@types/prettier": "^2.4.4",
     "autoprefixer": "^10.4.4",
+    "patch-package": "^6.4.7",
     "postcss": "^8.4.12",
     "svelte": "^3.44.0",
     "svelte-check": "^2.2.6",
@@ -26,6 +29,7 @@
   "dependencies": {
     "ace-builds": "^1.4.14",
     "firebase": "^9.6.9",
-    "moment": "^2.29.1"
+    "moment": "^2.29.1",
+    "prettier": "^2.6.0"
   }
 }

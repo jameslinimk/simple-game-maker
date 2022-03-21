@@ -1,0 +1,12 @@
+diff --git a/node_modules/ace-builds/ace.d.ts b/node_modules/ace-builds/ace.d.ts
+index bdf62ff..0409378 100644
+--- a/node_modules/ace-builds/ace.d.ts
++++ b/node_modules/ace-builds/ace.d.ts
+@@ -399,6 +399,7 @@ export namespace Ace {
+   }
+ 
+   export interface EditSession extends EventEmitter, OptionsProvider, Folding {
++    $worker: any;
+     selection: Selection;
+ 
+     // TODO: define BackgroundTokenizer
