@@ -35,7 +35,6 @@ class sGame {
 
 		this._running = false
 		running.set(false)
-		console.log(running)
 		clearInterval(this.gameLoop)
 	}
 }

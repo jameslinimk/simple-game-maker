@@ -14,13 +14,14 @@
   "devDependencies": {
     "@sveltejs/adapter-auto": "next",
     "@sveltejs/kit": "next",
+    "@types/escodegen": "^0.0.7",
     "@types/prettier": "^2.4.4",
     "autoprefixer": "^10.4.4",
     "patch-package": "^6.4.7",
     "postcss": "^8.4.12",
     "svelte": "^3.44.0",
     "svelte-check": "^2.2.6",
-    "svelte-preprocess": "^4.10.1",
+    "svelte-preprocess": "^4.8.0",
     "tailwindcss": "^3.0.23",
     "tslib": "^2.3.1",
     "typescript": "~4.6.2"
@@ -28,6 +29,8 @@
   "type": "module",
   "dependencies": {
     "ace-builds": "^1.4.14",
+    "escodegen": "^2.0.0",
+    "esprima-next": "^5.8.1",
     "firebase": "^9.6.9",
     "moment": "^2.29.1",
     "prettier": "^2.6.0"

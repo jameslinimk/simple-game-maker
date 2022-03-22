@@ -1,13 +1,13 @@
 <script lang="ts">
 	import ConsoleOutput from "$lib/consoleOutput.svelte";
 	import execute from "$lib/execute";
+	import { auth } from "$lib/firebase";
+	import format from "$lib/format";
 	import sGame, { running } from "$lib/game/sGame";
 	import OptionMenu from "$lib/optionMenu.svelte";
 	import resizeable from "$lib/resizeable";
 	import { themeData, themeLightOrDark } from "$lib/themeData";
 	import type { Ace } from "ace-builds";
-	import { format } from "prettier";
-	import parserBabel from "prettier/esm/parser-babel.mjs";
 	import { onMount } from "svelte";
 	import { fade } from "svelte/transition";
 
@@ -28,7 +28,7 @@
 			enableLiveAutocompletion: true,
 			theme: "ace/theme/one_dark",
 			mode: "ace/mode/javascript",
-			value: 'var foo = false;\nlet bar = true;\nconst FOO = "hello world!";\n\nif (foo) {\n\tconsole.log("Hello world!");\n} else {\n\tconsole.log("Goodbye world!");\n}\n\nfunction square(number) {\n\treturn number * number;\n}\nconst squareAnon = (number) => number * number;\n\nconst emotions = [":)", ":(", ">:(", ">:)", "<3"];\n\nconst car = {\n\tname: "Tesla",\n\tyear: "2025"\n};\n\nclass Person {\n\tconstructor(name, age) {\n\t\tthis.name = name;\n\t\tthis.age = age;\n\t}\n\n\tinfo() {\n\t\tconsole.log(`${this.name} is ${this.age} years old!`);\n\t}\n}\n\nasync function main() {\n\tconsole.log("Async function!");\n}',
+			value: 'var foo = false\nlet bar = true\nconst FOO = "hello world!"\n\nif (foo) {\n\tconsole.log("Hello world!")\n} else {\n\tconsole.log("Goodbye world!")\n}\n\nfunction square(number) {\n\treturn number * number\n}\nconst squareAnon = (number) => number * number\n\nconst emotions = [":)", ":(", ">:(", ">:)", "<3"]\n\nconst car = {\n\tname: "Tesla",\n\tyear: "2025",\n}\n\nclass Person {\n\tconstructor(name, age) {\n\t\tthis.name = name\n\t\tthis.age = age\n\t}\n\n\tinfo() {\n\t\tconsole.log(`${this.name} is ${this.age} years old!`)\n\t}\n}\n\nasync function main() {\n\tconsole.log("Async function!")\n}\n\ndo {\n\tlet test = false\n} while (true)\n\nwhile (true) {\n\tlet test2 = true\n}\n',
 			wrap: true,
 		});
 		(<any>editor.session.on)("changeMode", (_: any, session: any) => {
@@ -36,7 +36,7 @@
 				{
 					esversion: 9,
 					esnext: false,
-					asi: true,
+					asi: !currentSemicolons,
 				},
 			]);
 		});
@@ -55,6 +55,9 @@
 
 		const localFontSize = parseInt(localStorage.getItem("fontSize"));
 		if (localFontSize) changeEditorFontSize(localFontSize);
+
+		const localSemicolons = localStorage.getItem("semicolons");
+		if (localSemicolons && (localSemicolons === "true" || localSemicolons === "false")) toggleSemicolons(localSemicolons === "true");
 
 		/* -------------------------------------------------------------------------- */
 		/*                               burgerMenuOpen                               */
@@ -87,6 +90,20 @@
 		localStorage.setItem("fontSize", `${fontSize}`);
 	};
 
+	let currentSemicolons = false;
+	const toggleSemicolons = (on: boolean) => {
+		if (editor.session.$worker) {
+			editor.session.$worker.send("changeOptions", [
+				{
+					asi: !on,
+				},
+			]);
+		}
+		prettierFormat.semi = on;
+		currentSemicolons = on;
+		localStorage.setItem("semicolons", `${on}`);
+	};
+
 	let consoleOutputAutoScroll: boolean;
 
 	let consoleOutput: any[] = [{ newConsoleOutput: true, date: Date.now() }];
@@ -105,17 +122,6 @@
 	const prettierFormat = {
 		useTabs: true,
 		semi: false,
-	};
-
-	const formatCode = () => {
-		if (editor.session.getAnnotations().filter((annotation) => annotation.type === "error").length > 0) return;
-		editor.session.setValue(
-			format(editor.getValue(), {
-				...prettierFormat,
-				parser: "babel",
-				plugins: [parserBabel],
-			})
-		);
 	};
 </script>
 
@@ -139,18 +145,7 @@
 								},
 								true,
 							],
-							[
-								"Semicolons",
-								(on) => {
-									editor.session.$worker.send("changeOptions", [
-										{
-											asi: !on,
-										},
-									]);
-									prettierFormat.semi = on;
-								},
-								false,
-							],
+							["Semicolons", (on) => toggleSemicolons(on), currentSemicolons],
 						],
 						dropdownOptions: [
 							["Select theme", themeData.map((theme) => [`${theme[2] === "dark" ? "🌑" : "☀"} - ${theme[0]}`, theme[1]]), toggleTheme, currentTheme],
@@ -169,6 +164,17 @@
 				}}
 			/>
 		{/if}
+		<div class="absolute bottom-0 left-0 z-10 w-full flex justify-center items-center p-1 gap-1 bg-slate-200 dark:bg-slate-700">
+			<button
+				on:click={() => format(editor, prettierFormat)}
+				class="bg-slate-500 shadow-sm shadow-black rounded-2xl opacity-40 p-1 text-white dark:text-black hover:opacity-80 hover:rounded-lg hover:scale-[1.1] transition-all duration-300"
+			>
+				Format
+			</button>
+			<button class="bg-slate-500 shadow-sm shadow-black rounded-2xl opacity-40 p-1 text-white dark:text-black hover:opacity-80 hover:rounded-lg hover:scale-[1.1] transition-all duration-300">
+				{auth.currentUser ? "Sign out" : "Log in"}
+			</button>
+		</div>
 
 		<div class="absolute flex flex-col top-2 right-2 gap-1 items-end">
 			<button
@@ -213,12 +219,6 @@
 					</div>
 				{/if}
 			</button>
-			<button
-				on:click={formatCode}
-				class="bg-slate-500 shadow-sm shadow-black rounded-2xl opacity-40 p-1 text-white dark:text-black hover:opacity-80 hover:rounded-lg hover:scale-[1.1] transition-all duration-300"
-			>
-				Format
-			</button>
 		</div>
 	</div>
 
@@ -228,16 +228,6 @@
 		<div class="bg-slate-100 dark:bg-slate-700 h-3/4 grid place-items-center text-2xl font-semibold text-black dark:text-white">
 			<canvas id="gameCanvas" class="w-full h-full" bind:this={sGame.canvas} />
 		</div>
-		<button
-			on:click={() => {
-				sGame.start();
-			}}>Start</button
-		>
-		<button
-			on:click={() => {
-				sGame.stop();
-			}}>Stop</button
-		>
 		<div id="resizer2" class="h-2 bg-slate-400 dark:bg-slate-500 cursor-ns-resize z-40" data-direction="vertical" />
 		<div class="bg-slate-100 dark:bg-gray-800 flex-1 text-2xl font-semibold text-black dark:text-white overflow-auto">
 			<ConsoleOutput {consoleOutput} bind:autoScroll={consoleOutputAutoScroll} />
