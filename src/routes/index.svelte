@@ -1,7 +1,6 @@
 <script lang="ts">
 	import ConsoleOutput from "$lib/consoleOutput.svelte";
 	import execute from "$lib/execute";
-	import { auth } from "$lib/firebase";
 	import format from "$lib/format";
 	import sGame, { running } from "$lib/game/sGame";
 	import OptionMenu from "$lib/optionMenu.svelte";
@@ -40,6 +39,8 @@
 				},
 			]);
 		});
+
+		[...document.getElementsByClassName("ace_scrollbar-v")].forEach((item: HTMLDivElement) => (item.style.width = "0"));
 
 		/* -------------------------------------------------------------------------- */
 		/*                                  Resizing                                  */
@@ -125,9 +126,9 @@
 	};
 </script>
 
-<div class="absolute top-0 right-0 bottom-0 left-0 flex">
+<div class="flex flex-1">
 	<div class="w-1/2 relative">
-		<div id="editor" class="absolute top-0 right-0 bottom-0 left-0" />
+		<div id="editor" class="no-scrollbar w-full h-full" />
 
 		{#if burgerMenuOpen}
 			<OptionMenu
@@ -136,7 +137,7 @@
 						checkboxOptions: [
 							["Toggle overflow wrap", (on) => editor.session.setUseWrapMode(on), true],
 							[
-								"Enable autocompletion",
+								"Enable code autocompletion",
 								(on) => {
 									editor.setOptions({
 										enableBasicAutocompletion: on,
@@ -164,17 +165,6 @@
 				}}
 			/>
 		{/if}
-		<div class="absolute bottom-0 left-0 z-10 w-full flex justify-center items-center p-1 gap-1 bg-slate-200 dark:bg-slate-700">
-			<button
-				on:click={() => format(editor, prettierFormat)}
-				class="bg-slate-500 shadow-sm shadow-black rounded-2xl opacity-40 p-1 text-white dark:text-black hover:opacity-80 hover:rounded-lg hover:scale-[1.1] transition-all duration-300"
-			>
-				Format
-			</button>
-			<button class="bg-slate-500 shadow-sm shadow-black rounded-2xl opacity-40 p-1 text-white dark:text-black hover:opacity-80 hover:rounded-lg hover:scale-[1.1] transition-all duration-300">
-				{auth.currentUser ? "Sign out" : "Log in"}
-			</button>
-		</div>
 
 		<div class="absolute flex flex-col top-2 right-2 gap-1 items-end">
 			<button
@@ -219,6 +209,39 @@
 					</div>
 				{/if}
 			</button>
+			<button
+				on:click={() => format(editor, prettierFormat)}
+				class="bg-slate-500 shadow-sm shadow-black rounded-2xl opacity-40 p-1 text-white dark:text-black hover:opacity-80 hover:rounded-lg hover:scale-[1.1] transition-all duration-300"
+			>
+				Format
+			</button>
+			<!-- <button
+				class="bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 relative opacity-40 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center "
+			>
+				<svg width="30" height="22" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+					<g transform="translate(128 128) scale(0.72 0.72)">
+						<g
+							style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;"
+							transform="translate(-175.05 -175.05000000000004) scale(3.89 3.89)"
+						>
+							<path
+								d="M 45 40.375 L 45 40.375 c -9.415 0 -17.118 -7.703 -17.118 -17.118 v -6.139 C 27.882 7.703 35.585 0 45 0 h 0 c 9.415 0 17.118 7.703 17.118 17.118 v 6.139 C 62.118 32.672 54.415 40.375 45 40.375 z"
+								style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill-rule: nonzero; opacity: 1;"
+								class="dark:fill-slate-800 fill-slate-300"
+								transform=" matrix(1 0 0 1 0 0) "
+								stroke-linecap="round"
+							/>
+							<path
+								d="M 54.639 42.727 C 51.743 44.226 48.47 45.09 45 45.09 s -6.743 -0.863 -9.639 -2.363 c -12.942 1.931 -22.952 13.162 -22.952 26.619 v 17.707 c 0 1.621 1.326 2.946 2.946 2.946 h 59.29 c 1.621 0 2.946 -1.326 2.946 -2.946 V 69.347 C 77.591 55.889 67.581 44.659 54.639 42.727 z"
+								style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill-rule: nonzero; opacity: 1;"
+								class="dark:fill-slate-800 fill-slate-300"
+								transform=" matrix(1 0 0 1 0 0) "
+								stroke-linecap="round"
+							/>
+						</g>
+					</g></svg
+				>
+			</button> -->
 		</div>
 	</div>
 
@@ -228,7 +251,7 @@
 		<div class="bg-slate-100 dark:bg-slate-700 h-3/4 grid place-items-center text-2xl font-semibold text-black dark:text-white">
 			<canvas id="gameCanvas" class="w-full h-full" bind:this={sGame.canvas} />
 		</div>
-		<div id="resizer2" class="h-2 bg-slate-400 dark:bg-slate-500 cursor-ns-resize z-40" data-direction="vertical" />
+		<div id="resizer2" class="h-2 bg-slate-300 dark:bg-slate-600 cursor-ns-resize z-40" data-direction="vertical" />
 		<div class="bg-slate-100 dark:bg-gray-800 flex-1 text-2xl font-semibold text-black dark:text-white overflow-auto">
 			<ConsoleOutput {consoleOutput} bind:autoScroll={consoleOutputAutoScroll} />
 		</div>

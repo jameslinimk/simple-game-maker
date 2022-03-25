@@ -17,7 +17,8 @@ class sGame {
 	canvas: HTMLCanvasElement
 	constructor() {
 		this._running = false
-		this.onFrame = (dt) => { console.log("DT:", dt) }
+
+		this.onFrame = () => { }
 	}
 
 	async start() {
@@ -34,6 +35,7 @@ class sGame {
 		if (!this._running) return
 
 		this._running = false
+		console.log("stopping")
 		running.set(false)
 		clearInterval(this.gameLoop)
 	}

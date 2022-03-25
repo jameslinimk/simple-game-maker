@@ -7,7 +7,7 @@ import parserBabel from "prettier/esm/parser-babel.mjs"
 import { addPopup } from "./popup"
 
 export default (editor: Ace.Editor, prettierFormat: {}) => {
-	if (editor.session.getAnnotations().filter((annotation) => annotation.type === "error").length > 0) return
+	if (editor.session.getAnnotations().filter((annotation) => annotation.type === "error").length > 0) return addPopup("Error while formatting", "Please fix all problems in your code first!")
 
 	try {
 		editor.session.setValue(
@@ -18,20 +18,22 @@ export default (editor: Ace.Editor, prettierFormat: {}) => {
 			})
 		)
 	} catch (error) {
-		return addPopup("There was an error while formatting!", error)
+		console.log("%cError (formatting code):", "color: #DC2626; font-weight: 800", error)
+		return addPopup("Error while formatting", "Please look for errors in your code!")
 	}
 
-	addPopup("Formatted!", "")
+	addPopup("Formatted!", "", 1000, "green-600")
 }
 
 const varName = "__iterationCounts__"
 const loopCheckHead: Statement[] = (<any>esprima.parse(`const ${varName} = {}`).body[0])
 const loopCheck = (id: string): Statement[] => (<any>esprima.parse(`while(true){if (${varName}["${id}"] === undefined) ${varName}["${id}"] = 0;${varName}["${id}"]++;if (${varName}["${id}"] >= 15000) throw new Error("Loop exceeds 15000 iterations. Check for an infinite loop!")}`).body[0]).body.body
-const formatCodeExecution = (editor: Ace.Editor) => {
+const formatCodeExecution = (code: string) => {
 	let tokens: parsedTokens | Statement[]
 	try {
-		tokens = esprima.parse(editor.getValue())
+		tokens = esprima.parse(code)
 	} catch (error) {
+		console.log("%cError (instrumenting code):", "color: #DC2626; font-weight: 800", error)
 		return addPopup("There was an error while executing!", error)
 	}
 
@@ -50,3 +52,8 @@ const formatCodeExecution = (editor: Ace.Editor) => {
 
 	return escodegen.generate(tokens)
 }
+
+export {
+	formatCodeExecution
+}
+

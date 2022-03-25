@@ -1,8 +1,16 @@
 <script lang="ts">
-	import { addProject, auth, getUserData, overrideUserData, updateUserData } from "$lib/firebase";
+	import { auth, overrideUserData } from "$lib/firebase";
 	import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+	import { onMount } from "svelte";
 
+	let prevLink = "/";
 	let type: "signin" | "signup" = "signup";
+	onMount(() => {
+		const params = new URLSearchParams(window.location.search);
+		prevLink = params.get("prevLink") || "/";
+		const rawType = params.get("type");
+		type = rawType === "signup" || rawType === "signin" ? rawType : "signup";
+	});
 
 	let email: string;
 	let username: string;
@@ -85,10 +93,16 @@
 	let generalError: false | string = false;
 </script>
 
-<div class="h-full m-0 left-0 top-0 fixed w-full flex justify-center items-center">
+<div class="h-full m-0 left-0 top-0 fixed w-full flex justify-center items-center bg-slate-400">
+	<a
+		href={prevLink}
+		class="bg-blue-500 p-2 text-2xl rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300 absolute left-3 bottom-3"
+	>
+		Go back
+	</a>
 	<div class="grid place-items-center bg-slate-700 h-fit rounded-md p-5 gap-2 w-96 shadow-md shadow-black">
 		<div class="flex gap-2">
-			<div class="capitalize text-3xl font-semibold text-white bg-slate-800 pr-2 pl-2 rounded-md shadow-black shadow-sm inline-block">{type}</div>
+			<div class="text-3xl font-semibold text-white bg-slate-800 pr-2 pl-2 rounded-md shadow-black shadow-sm inline-block">{type === "signin" ? "Log in" : "Sign up"}</div>
 			<button
 				on:click={() => {
 					type = type === "signin" ? "signup" : "signin";
@@ -98,7 +112,7 @@
 				}}
 				class="bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
 			>
-				{type === "signin" ? "Create an account" : "Sign in to existing account"}
+				{type === "signin" ? "Create an account" : "Log in to existing account"}
 			</button>
 		</div>
 
@@ -167,40 +181,5 @@
 				</button>
 			{/if}
 		</div>
-	</div>
-
-	<div class="grid place-items-center bg-slate-700 h-fit rounded-md p-5 gap-2 shadow-md shadow-black ml-2">
-		<button
-			class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
-			on:click={async () => {
-				console.log(await getUserData());
-			}}
-		>
-			User info
-		</button>
-		<button
-			class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
-			on:click={async () => {
-				console.log(await updateUserData({ test: false }));
-			}}
-		>
-			Set test
-		</button>
-		<button
-			class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
-			on:click={() => {
-				console.log("epico");
-			}}
-		>
-			Update test
-		</button>
-		<button
-			class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
-			on:click={async () => {
-				console.log(await addProject("testName", 'console.log("hey")'));
-			}}
-		>
-			Add project
-		</button>
 	</div>
 </div>

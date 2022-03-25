@@ -14,35 +14,32 @@ const app = initializeApp({
 const auth = getAuth()
 const database = getDatabase()
 
-const updateUserData = async (data: { [key: string]: any }, optionalPath = "") => {
-	if (!auth.currentUser) return "not logged in"
+type Response<T> = [data: T | null, error: string | null]
+
+const updateUserData = async (data: any, optionalPath = ""): Promise<Response<true>> => {
+	if (!auth.currentUser) return [null, "not logged in"]
 
 	await update(ref(database, `users/${auth.currentUser.uid}${optionalPath}`), data)
-	return true
+	return [true, null]
 }
 
-const overrideUserData = async (data: { [key: string]: any }, optionalPath = "") => {
-	if (!auth.currentUser) return "not logged in"
+const overrideUserData = async (data: any, optionalPath = ""): Promise<Response<true>> => {
+	if (!auth.currentUser) return [null, "not logged in"]
 
 	await set(ref(database, `users/${auth.currentUser.uid}${optionalPath}`), data)
-	return true
+	return [true, null]
 }
 
-const getUserData = async (optionalPath = "") => {
-	if (!auth.currentUser) return "not logged in"
+const getUserData = async (optionalPath = ""): Promise<Response<any>> => {
+	if (!auth.currentUser) return [null, "not logged in"]
 
-	let error: false | string = false
+	let error = false
 	const snapshot = await get(child(ref(database), `users/${auth.currentUser.uid}${optionalPath}`)).catch(err => {
-		error = err
-		return false
+		error = true
+		return err
 	})
-	if (error || typeof snapshot === "boolean" || !snapshot.exists()) return error || "no data"
-	return snapshot.val()
-}
-
-const addProject = async (name: string, code: string) => {
-	if (!auth.currentUser) return "not logged in"
-	return updateUserData({ [name]: code }, "/projects")
+	if (error || !snapshot.exists()) return [null, error || "no data"]
+	return [snapshot.val(), null]
 }
 
 export {
@@ -51,7 +48,10 @@ export {
 	database,
 	updateUserData,
 	overrideUserData,
-	getUserData,
-	addProject
+	getUserData
 }
+export type {
+	Response
+}
+
 
