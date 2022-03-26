@@ -20,3 +20,6 @@ const walkPages = async (directory: string) => {
 walkPages("./src/lib/docs")
 
 export default (page: string) => pages.get(page) || pages.get("404")
+export {
+	pages
+}
