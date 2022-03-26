@@ -14,7 +14,9 @@
   "devDependencies": {
     "@sveltejs/adapter-auto": "next",
     "@sveltejs/kit": "next",
+    "@tailwindcss/typography": "^0.5.2",
     "@types/escodegen": "^0.0.7",
+    "@types/marked": "^4.0.3",
     "@types/prettier": "^2.4.4",
     "autoprefixer": "^10.4.4",
     "patch-package": "^6.4.7",
@@ -32,6 +34,7 @@
     "escodegen": "^2.0.0",
     "esprima-next": "^5.8.1",
     "firebase": "^9.6.9",
+    "marked": "^4.0.12",
     "moment": "^2.29.1",
     "prettier": "^2.6.0"
   }
