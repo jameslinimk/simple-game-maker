@@ -1,25 +1,9 @@
-import fs from "fs"
-import { marked } from "marked"
-import path from "path"
-
-const pages = new Map<string, string>()
-const walkPages = async (directory: string) => {
-	for (const file of fs.readdirSync(directory)) {
-		const absolute = path.join(directory, file)
-		const lstat = fs.statSync(absolute)
-		if (lstat.isDirectory()) {
-			walkPages(absolute)
-			continue
-		}
-		if (!lstat.isFile() || !file.endsWith(".md")) continue
-
-		const text = fs.readFileSync(absolute).toString("utf-8")
-		pages.set(file.slice(0, -3), marked.parse(text))
-	}
+export default {
+	"404": "<h1 id=\"no-page\">No page</h1>\n",
+	"test": "<h1 id=\"marked---markdown-parser\">Marked - Markdown Parser</h1>\n<p><a href=\"https://github.com/markedjs/marked/\">Marked</a> lets you convert <a href=\"http://daringfireball.net/projects/markdown/\">Markdown</a> into HTML.  Markdown is a simple text format whose goal is to be very easy to read and write, even when not converted to HTML.  This demo page will let you type anything you like and see how it gets converted.  Live.  No more waiting around.</p>\n<h2 id=\"how-to-use-the-demo\">How To Use The Demo</h2>\n<ol>\n<li>Type in stuff on the left.</li>\n<li>See the live updates on the right.</li>\n</ol>\n<p>That&#39;s it.  Pretty simple.  There&#39;s also a drop-down option in the upper right to switch between various views:</p>\n<ul>\n<li><strong>Preview:</strong>  A live display of the generated HTML as it would render in a browser.</li>\n<li><strong>HTML Source:</strong>  The generated HTML before your browser makes it pretty.</li>\n<li><strong>Lexer Data:</strong>  What <a href=\"https://github.com/markedjs/marked/\">marked</a> uses internally, in case you like gory stuff like this.</li>\n<li><strong>Quick Reference:</strong>  A brief run-down of how to format things using markdown.</li>\n</ul>\n<h2 id=\"why-markdown\">Why Markdown?</h2>\n<p>It&#39;s easy.  It&#39;s not overly bloated, unlike HTML.  Also, as the creator of <a href=\"http://daringfireball.net/projects/markdown/\">markdown</a> says,</p>\n<blockquote>\n<p>The overriding design goal for Markdown&#39;s\nformatting syntax is to make it as readable\nas possible. The idea is that a\nMarkdown-formatted document should be\npublishable as-is, as plain text, without\nlooking like it&#39;s been marked up with tags\nor formatting instructions.</p>\n</blockquote>\n<p>Ready to start writing?  Either start changing stuff on the left or\n<a href=\"/demo/?text=\">clear everything</a> with a simple click.</p>\n",
+	"test2": "<h1 id=\"marked---markdown-parser-2\">Marked - Markdown Parser 2</h1>\n<p><a href=\"https://github.com/markedjs/marked/\">Marked</a> lets you convert <a href=\"http://daringfireball.net/projects/markdown/\">Markdown</a> into HTML.  Markdown is a simple text format whose goal is to be very easy to read and write, even when not converted to HTML.  This demo page will let you type anything you like and see how it gets converted.  Live.  No more waiting around.</p>\n<h2 id=\"how-to-use-the-demo\">How To Use The Demo</h2>\n<ol>\n<li>Type in stuff on the left.</li>\n<li>See the live updates on the right.</li>\n</ol>\n<p>That&#39;s it.  Pretty simple.  There&#39;s also a drop-down option in the upper right to switch between various views:</p>\n<ul>\n<li><strong>Preview:</strong>  A live display of the generated HTML as it would render in a browser.</li>\n<li><strong>HTML Source:</strong>  The generated HTML before your browser makes it pretty.</li>\n<li><strong>Lexer Data:</strong>  What <a href=\"https://github.com/markedjs/marked/\">marked</a> uses internally, in case you like gory stuff like this.</li>\n<li><strong>Quick Reference:</strong>  A brief run-down of how to format things using markdown.</li>\n</ul>\n<h2 id=\"why-markdown\">Why Markdown?</h2>\n<p>It&#39;s easy.  It&#39;s not overly bloated, unlike HTML.  Also, as the creator of <a href=\"http://daringfireball.net/projects/markdown/\">markdown</a> says,</p>\n<blockquote>\n<p>The overriding design goal for Markdown&#39;s\nformatting syntax is to make it as readable\nas possible. The idea is that a\nMarkdown-formatted document should be\npublishable as-is, as plain text, without\nlooking like it&#39;s been marked up with tags\nor formatting instructions.</p>\n</blockquote>\n<p>Ready to start writing?  Either start changing stuff on the left or\n<a href=\"/demo/?text=\">clear everything</a> with a simple click.</p>\n",
 }
-walkPages("./src/lib/docs")
 
-export default (page: string) => pages.get(page) || pages.get("404")
-export {
-	pages
+export const categories: { [key: string]: string[] } = {
+	"Introduction": ["test", "test2"],
 }

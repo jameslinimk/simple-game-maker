@@ -9,7 +9,8 @@
     "prepare": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "docs": "tsc src\\lib\\docs\\docGen.ts --target esnext --allowSyntheticDefaultImports true & node src\\lib\\docs\\docGen"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "next",
