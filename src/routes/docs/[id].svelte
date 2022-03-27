@@ -7,11 +7,13 @@
 </script>
 
 <div class="flex flex-1 bg-slate-200 dark:bg-slate-700">
-	<div class="w-1/6 bg-slate-300 dark:bg-slate-600 flex flex-col">
-		<div class="dark:bg-slate-100 text-center text-2xl font-semibold pb-1 mb-2">Docs pages</div>
+	<div class="w-1/6 bg-slate-100 dark:bg-slate-600 flex flex-col">
+		<div class="dark:bg-slate-300 bg-slate-400 text-center sm:text-2xl text-xl font-semibold pb-1 mb-2 transition-all">Docs pages</div>
 		{#each Object.keys(categories) as category}
 			<button
-				class="capitalize dark:bg-slate-{$toggles[category] ? '300' : '400'} transition-all duration-300 text-left pl-1 text-xl font-semibold"
+				class="capitalize bg-slate-{$toggles[category] ? '300' : '200'} dark:bg-slate-{$toggles[category]
+					? '300'
+					: '400'} transition-all duration-300 text-left sm:text-xl pl-1 text-sm font-semibold"
 				on:click={() => ($toggles[category] = !$toggles[category])}
 			>
 				{category}
@@ -26,7 +28,7 @@
 			{#if $toggles[category]}
 				<div class="flex ml-[5%] flex-col">
 					{#each categories[category] as page}
-						<a href="/docs/{page}" class="pl-1 w-full capitalize dark:bg-slate-500 text-md font-semibold hover:dark:bg-slate-300 transition-all">
+						<a href="/docs/{page}" class="pl-1 w-full capitalize bg-slate-200 dark:bg-slate-500 text-md font-semibold hover:dark:bg-slate-300 transition-all">
 							{page}{currentPage === page ? " (selected)" : ""}
 						</a>
 					{/each}

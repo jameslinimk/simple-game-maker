@@ -4,12 +4,12 @@
 	import { onMount } from "svelte";
 
 	let prevLink = "/";
-	let type: "signin" | "signup" = "signup";
+	let type: "login" | "signup" = "login";
 	onMount(() => {
 		const params = new URLSearchParams(window.location.search);
 		prevLink = params.get("prevLink") || "/";
 		const rawType = params.get("type");
-		type = rawType === "signup" || rawType === "signin" ? rawType : "signup";
+		type = rawType === "signup" || rawType === "login" ? rawType : "login";
 	});
 
 	let email: string;
@@ -18,8 +18,10 @@
 	let password: string;
 
 	const submit = async () => {
+		if (emailError || usernameError || passwordError || generalError) return;
+
 		if (type === "signup" && !username) {
-			usernameError = "Plesae enter an username!";
+			usernameError = "Please enter an username!";
 			return;
 		}
 		if (!email) {
@@ -43,7 +45,6 @@
 
 		if (type === "signup") {
 			const credential = await createUserWithEmailAndPassword(auth, email, password).catch((error) => {
-				// const code: string = error.code;
 				const msg: string = error.message;
 
 				if (msg.toLowerCase().includes("email")) {
@@ -60,13 +61,12 @@
 				return;
 			});
 			if (!credential) return;
+
 			await overrideUserData({ username: username });
-			console.log("Logged in!");
 			return true;
 		}
 
-		const credential = signInWithEmailAndPassword(auth, email, password).catch((error) => {
-			// const code: string = error.code;
+		const credential = await signInWithEmailAndPassword(auth, email, password).catch((error) => {
 			const msg: string = error.message;
 
 			if (msg.toLowerCase().includes("email")) {
@@ -83,7 +83,7 @@
 			return;
 		});
 		if (!credential) return;
-		console.log("Logged in!");
+
 		return true;
 	};
 
@@ -102,17 +102,17 @@
 	</a>
 	<div class="grid place-items-center bg-slate-700 h-fit rounded-md p-5 gap-2 w-96 shadow-md shadow-black">
 		<div class="flex gap-2">
-			<div class="text-3xl font-semibold text-white bg-slate-800 pr-2 pl-2 rounded-md shadow-black shadow-sm inline-block">{type === "signin" ? "Log in" : "Sign up"}</div>
+			<div class="text-3xl font-semibold text-white bg-slate-800 pr-2 pl-2 rounded-md shadow-black shadow-sm inline-block">{type === "login" ? "Log in" : "Sign up"}</div>
 			<button
 				on:click={() => {
-					type = type === "signin" ? "signup" : "signin";
+					type = type === "login" ? "signup" : "login";
 					emailError = false;
 					passwordError = false;
 					usernameError = false;
 				}}
 				class="bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
 			>
-				{type === "signin" ? "Create an account" : "Log in to existing account"}
+				{type === "login" ? "Create an account" : "Log in to existing account"}
 			</button>
 		</div>
 
@@ -175,10 +175,13 @@
 			>
 				Submit
 			</button>
-			{#if type === "signin"}
-				<button class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300">
+			{#if type === "login"}
+				<a
+					href="/forgot?prevLink=/login"
+					class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
+				>
 					Forgot your password?
-				</button>
+				</a>
 			{/if}
 		</div>
 	</div>

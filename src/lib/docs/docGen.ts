@@ -10,14 +10,11 @@ const categories: { [key: string]: string[] } = {}
 const parseText = (text: string) => text.replace(new RegExp('"', "g"), '\\"').replace(new RegExp("\n", "g"), "\\n")
 
 const walkPages = async (directory: string) => {
-	for (const file of fs.readdirSync(directory)) {
+	fs.readdirSync(directory).forEach(file => {
 		const absolute = path.join(directory, file)
 		const lstat = fs.statSync(absolute)
-		if (lstat.isDirectory()) {
-			walkPages(absolute)
-			continue
-		}
-		if (!lstat.isFile() || !file.endsWith(".md")) continue
+		if (lstat.isDirectory()) return walkPages(absolute)
+		if (!lstat.isFile() || !file.endsWith(".md")) return
 
 		const fileName = file.slice(0, -3)
 
@@ -27,17 +24,17 @@ const walkPages = async (directory: string) => {
 			if (!categories[infoLine.category]) categories[infoLine.category] = [fileName]
 			else categories[infoLine.category].push(fileName)
 			code.push(`\t"${fileName}": "${parseText(marked.parse(text.split("\n").slice(1).join("\n")))}",`)
-			continue
+			return
 		}
 		code.push(`\t"${fileName}": "${parseText(marked.parse(text))}",`)
-	}
+	})
 }
-walkPages("./src/lib/docs")
+walkPages("./src/lib/docs/pages")
 code.push("}", "")
 
 code.push("export const categories: { [key: string]: string[] } = {")
 Object.keys(categories).forEach(key => code.push(`\t"${key}": ["${categories[key].join('", "')}"],`))
-code.push("}")
+code.push("}", "")
 
 fs.writeFileSync("./src/lib/docs/docs.ts", code.join("\n"))
 

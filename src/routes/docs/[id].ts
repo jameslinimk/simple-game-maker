@@ -1,6 +1,6 @@
 import docs from "$lib/docs/docs"
 
-export async function get({ params }) {
+export const get = ({ params }) => {
 	return {
 		body: {
 			html: docs[params.id] || docs["404"],

@@ -5,6 +5,11 @@ module.exports = {
         extend: {}
     },
     plugins: [
-        require("@tailwindcss/typography"),
+        require("@tailwindcss/typography")
     ],
+    purge: {
+        options: {
+            safelist: ["bg-red-600", "bg-green-600"],
+        }
+    }
 }
