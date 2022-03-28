@@ -19,14 +19,23 @@ const walkPages = async (directory: string) => {
 		const fileName = file.slice(0, -3)
 
 		const text = fs.readFileSync(absolute).toString("utf-8")
-		const infoLine = text.split("\n")[0].startsWith("INFO: ") && JSON.parse(text.split("\n")[0].slice(6))
-		if (infoLine?.category) {
+
+		let infoLine: { category: string }
+		try {
+			infoLine = text.split("\n")[0].startsWith("INFO: ") && JSON.parse(text.split("\n")[0].slice(6))
+		} catch (error) {
+			console.log(` - Error while parsing INFO in ${file}!`)
+		}
+		if (!infoLine) return
+
+		if (typeof infoLine?.category === "string") {
 			if (!categories[infoLine.category]) categories[infoLine.category] = [fileName]
 			else categories[infoLine.category].push(fileName)
-			code.push(`\t"${fileName}": "${parseText(marked.parse(text.split("\n").slice(1).join("\n")))}",`)
+			code.push(`\t"${fileName}": ${JSON.stringify(marked.parse(text.split("\n").slice(1).join("\n")))},`)
 			return
 		}
-		code.push(`\t"${fileName}": "${parseText(marked.parse(text))}",`)
+
+		code.push(`\t"${fileName}": ${JSON.stringify(marked.parse(text))},`)
 	})
 }
 walkPages("./src/lib/docs/pages")
