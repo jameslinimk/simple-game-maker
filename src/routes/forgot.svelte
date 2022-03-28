@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { auth } from "$lib/firebase";
+	import firebaseCodes from "$lib/firebaseCodes";
 	import { addPopup } from "$lib/popup";
 	import { sendPasswordResetEmail } from "firebase/auth";
 	import { onMount } from "svelte";
@@ -25,7 +26,7 @@
 			const msg: string = err.message;
 
 			if (msg.toLowerCase().includes("email")) {
-				emailError = msg;
+				emailError = firebaseCodes[err.code] || msg;
 				error = true;
 				return;
 			}

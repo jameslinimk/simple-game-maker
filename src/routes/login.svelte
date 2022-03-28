@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { auth, overrideUserData } from "$lib/firebase";
+	import firebaseCodes from "$lib/firebaseCodes";
 	import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 	import { onMount } from "svelte";
 
@@ -33,12 +34,12 @@
 			return;
 		}
 
-		if (username.length > 25) {
+		if (type === "signup" && username.length > 25) {
 			usernameError = `Username must be less than 25 characters! (${username.length - 25} characters over)`;
 			return;
 		}
 
-		if (!/^[A-Za-z0-9_'"-]*$/.test(username)) {
+		if (type === "signup" && !/^[A-Za-z0-9_'"-]*$/.test(username)) {
 			usernameError = "Username must only contain letters, numbers, -, _, ', and \"s!";
 			return;
 		}
@@ -48,16 +49,16 @@
 				const msg: string = error.message;
 
 				if (msg.toLowerCase().includes("email")) {
-					emailError = msg;
+					emailError = firebaseCodes[error.code] || msg;
 					return;
 				}
 
 				if (msg.toLowerCase().includes("password")) {
-					passwordError = msg;
+					passwordError = firebaseCodes[error.code] || msg;
 					return;
 				}
 
-				generalError = msg;
+				generalError = firebaseCodes[error.code] || msg;
 				return;
 			});
 			if (!credential) return;
@@ -70,16 +71,16 @@
 			const msg: string = error.message;
 
 			if (msg.toLowerCase().includes("email")) {
-				emailError = msg;
+				emailError = firebaseCodes[error.code] || msg;
 				return;
 			}
 
 			if (msg.toLowerCase().includes("password")) {
-				passwordError = msg;
+				passwordError = firebaseCodes[error.code] || msg;
 				return;
 			}
 
-			generalError = msg;
+			generalError = firebaseCodes[error.code] || msg;
 			return;
 		});
 		if (!credential) return;
@@ -109,6 +110,7 @@
 					emailError = false;
 					passwordError = false;
 					usernameError = false;
+					generalError = false;
 				}}
 				class="bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
 			>
