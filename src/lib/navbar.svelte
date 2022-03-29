@@ -22,7 +22,7 @@
 
 	<!-- CENTER -->
 	<div class="absolute left-1/2 -translate-x-1/2 flex gap-2 top-1/2 -translate-y-1/2">
-		<a href="/" class="text-2xl font-bold">Simple Game Maker</a>
+		<a href="/" class="sm:text-2xl text-xl font-bold transition-all">Simple Game Maker</a>
 	</div>
 
 	<!-- RIGHT -->
