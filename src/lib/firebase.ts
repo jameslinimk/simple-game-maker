@@ -1,3 +1,4 @@
+import chalk from "chalk"
 import { initializeApp } from "firebase/app"
 import { getAuth } from "firebase/auth"
 import { child, get, getDatabase, ref, set, update } from "firebase/database"
@@ -89,13 +90,23 @@ const updateProject = async (pid: string, newCode: string): Promise<Response<boo
 /*                                    Tests                                   */
 /* -------------------------------------------------------------------------- */
 
-// TODO
+// TODO Implement tests
+const testPrint = (label: string, update: any) => {
+	console.log(chalk.green("=".repeat(15)))
+	console.log(chalk.blueBright(label))
+	console.log(update)
+	console.log(chalk.green("=".repeat(15)))
+}
+
 export const generalTests = () => {
 
 }
+// generalTests()
+
 export const projectFuncsTest = () => {
 
 }
+// projectFuncsTest()
 
 export {
 	app,
