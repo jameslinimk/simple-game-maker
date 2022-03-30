@@ -18,8 +18,7 @@ export default (resizer: HTMLDivElement, onResize?: () => void) => {
 				prevSibling.style.height = `${h}%`
 				break
 
-			case "horizontal":
-			default:
+			case "horizontal": default:
 				const w = ((prevSiblingWidth + dx) * 100) / (<HTMLDivElement>resizer.parentNode).getBoundingClientRect().width
 				prevSibling.style.width = `${w}%`
 				break

@@ -59,32 +59,10 @@ export const createProject = async (code: string): Promise<Response<string>> => 
 	const projects = Object.keys(_projects[0])
 
 	let pid = id()
-	while (!(await projectExists(pid, projects))) pid = id()
+	while (projects.includes(pid)) pid = id()
 
 	updateUserData({ [pid]: code }, "/projects")
 	return [pid, null]
-}
-
-/**
- * Check to see if project exists
- * @param pid id of the project
- * @param projectKeys (optional) an existing array to check the id to
- * @returns wether or not the pid exists
- */
-export const projectExists = async (pid: string, projectKeys?: string[]) => {
-	if (projectKeys) return projectKeys.includes(pid)
-
-	const _projects = await getProjects()
-	if (_projects[1] !== null) return [null, _projects[1]]
-	return Object.keys(_projects[0]).includes(pid)
-}
-
-export const updateProject = async (pid: string, newCode: string): Promise<Response<boolean, "pid doesn't exist">> => {
-	const exists = await projectExists(pid)
-	if (!exists[0]) return [null, "pid doesn't exist"]
-	if (exists[1] !== null) return [null, exists[1]]
-
-	updateUserData({ [pid]: newCode }, "/projects")
 }
 
 /* -------------------------------------------------------------------------- */
@@ -97,9 +75,11 @@ const log = (label: string, ...messages: any[]) => {
 	console.log(chalk.green("=".repeat(label.length + 8)))
 }
 
+// TODO run tests
 export const generalTests = async () => {
 	console.log(chalk.blue.bold("Starting generalTests..."))
-	log("user data", await getUserData())
+	log("user data", await getUserData()[0])
+	await updateUserData("test", "/test")
 }
 
 // generalTests()
