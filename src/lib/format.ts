@@ -28,7 +28,7 @@ export default (editor: Ace.Editor, prettierFormat: {}) => {
 const varName = "__iterationCounts__"
 const loopCheckHead: Statement[] = (<any>esprima.parse(`const ${varName} = {}`).body[0])
 const loopCheck = (id: string): Statement[] => (<any>esprima.parse(`while(true){if (${varName}["${id}"] === undefined) ${varName}["${id}"] = 0;${varName}["${id}"]++;if (${varName}["${id}"] >= 15000) throw new Error("Loop exceeds 15000 iterations. Check for an infinite loop!")}`).body[0]).body.body
-const formatCodeExecution = (code: string) => {
+export const formatCodeExecution = (code: string) => {
 	let tokens: parsedTokens | Statement[]
 	try {
 		tokens = esprima.parse(code)
@@ -51,8 +51,4 @@ const formatCodeExecution = (code: string) => {
 	})
 
 	return escodegen.generate(tokens)
-}
-
-export {
-	formatCodeExecution
 }

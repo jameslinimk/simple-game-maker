@@ -41,18 +41,10 @@ class sGame {
 	}
 }
 
-const running = writable(false)
-export {
-	running
-}
-export type {
-	Vector2
-}
-
-
+export const running = writable(false)
 export default new sGame()
 
-interface Vector2 {
+export interface Vector2 {
 	x: number
 	y: number
 }

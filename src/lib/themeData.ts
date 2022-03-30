@@ -1,4 +1,4 @@
-const themeData: [name: string, value: string, theme: "light" | "dark"][] = [
+export const themeData: [name: string, value: string, theme: "light" | "dark"][] = [
 	["One Dark (default)", "one_dark", "dark"],
 	["Ambiance", "ambiance", "dark"],
 	["Chaos", "chaos", "dark"],
@@ -38,14 +38,9 @@ const themeData: [name: string, value: string, theme: "light" | "dark"][] = [
 	["Kuroir", "kuroir", "light"],
 	["KatzenMilch", "katzenmilch", "light"],
 	["SQL Server", "sqlserver", "light"],
-];
+]
 
-const themeLightOrDark = themeData.reduce<{ [key: string]: "light" | "dark" }>((acc, curr) => {
-	acc[curr[1]] = curr[2];
-	return acc;
-}, {});
-
-export {
-	themeData,
-	themeLightOrDark
-}
+export const themeLightOrDark = themeData.reduce<{ [key: string]: "light" | "dark" }>((acc, curr) => {
+	acc[curr[1]] = curr[2]
+	return acc
+}, {})

@@ -27,7 +27,7 @@ export default {
 	"auth/invalid-cordova-configuration": "The following Cordova plugins must be installed to enable OAuth sign-in: cordova-plugin-buildinfo, cordova-universal-links-plugin, cordova-plugin-browsertab, cordova-plugin-inappbrowser and cordova-plugin-customurlscheme.",
 	"auth/invalid-custom-token": "The custom token format is incorrect. Please check the documentation.",
 	"auth/invalid-dynamic-link-domain": "The provided dynamic link domain is not configured or authorized for the current project.",
-	"auth/invalid-email": "The email address is badly formatted.",
+	"auth/invalid-email": "The email address is not properly formatted.",
 	"auth/invalid-emulator-scheme": "Emulator URL must start with a valid scheme (http:// or https://).",
 	"auth/invalid-api-key": "Your API key is invalid, please check you have copied it correctly.",
 	"auth/invalid-cert-hash": "The SHA-1 certificate hash provided is invalid.",
