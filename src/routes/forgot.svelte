@@ -1,45 +1,45 @@
 <script lang="ts">
-	import { auth } from "$lib/firebase";
-	import firebaseCodes from "$lib/firebaseCodes";
-	import { addPopup } from "$lib/popup";
-	import { sendPasswordResetEmail } from "firebase/auth";
-	import { onMount } from "svelte";
+	import { auth } from "$lib/firebase"
+	import firebaseCodes from "$lib/firebaseCodes"
+	import { addPopup } from "$lib/popup"
+	import { sendPasswordResetEmail } from "firebase/auth"
+	import { onMount } from "svelte"
 
-	let prevLink = "/";
+	let prevLink = "/"
 	onMount(() => {
-		const params = new URLSearchParams(window.location.search);
-		prevLink = params.get("prevLink") || "/";
-	});
+		const params = new URLSearchParams(window.location.search)
+		prevLink = params.get("prevLink") || "/"
+	})
 
-	let email: string;
+	let email: string
 
 	const submit = async () => {
-		if (emailError) return;
+		if (emailError) return
 
 		if (!email) {
-			emailError = "Please enter an email!";
-			return;
+			emailError = "Please enter an email!"
+			return
 		}
 
-		let error = false;
+		let error = false
 		await sendPasswordResetEmail(auth, email).catch((err) => {
-			const msg: string = err.message;
+			const msg: string = err.message
 
 			if (msg.toLowerCase().includes("email")) {
-				emailError = firebaseCodes[err.code] || msg;
-				error = true;
-				return;
+				emailError = firebaseCodes[err.code] || msg
+				error = true
+				return
 			}
 
-			generalError = msg;
-			error = true;
-		});
-		if (error) return;
-		addPopup("Sent!", `Sent a password reset email to ${email}`);
-	};
+			generalError = msg
+			error = true
+		})
+		if (error) return
+		addPopup("Sent!", `Sent a password reset email to ${email}`)
+	}
 
-	let emailError: false | string = false;
-	let generalError: false | string = false;
+	let emailError: false | string = false
+	let generalError: false | string = false
 </script>
 
 <div class="h-full m-0 left-0 top-0 fixed w-full flex justify-center items-center bg-slate-400">
@@ -64,7 +64,9 @@
 				type="email"
 				id="email"
 				placeholder="example@gmail.com"
-				class="shadow-md shadow-black rounded-sm text-black text-md pb-1 pl-1 pr-1 focus:scale-[1.05] transition-all duration-300 w-full {emailError ? 'border-[#f56565] border-2' : ''}"
+				class="shadow-md shadow-black rounded-sm text-black text-md pb-1 pl-1 pr-1 focus:scale-[1.05] transition-all duration-300 w-full {emailError
+					? 'border-[#f56565] border-2'
+					: ''}"
 				bind:value={email}
 				on:input={() => (emailError = false)}
 			/>

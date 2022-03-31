@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { fade } from "svelte/transition";
-	import popups from "./popup";
+	import { fade } from "svelte/transition"
+	import popups from "./popup"
 </script>
 
 <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col gap-2 justify-center items-center z-50">

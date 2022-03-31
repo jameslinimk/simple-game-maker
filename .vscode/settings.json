@@ -1,20 +1,13 @@
 {
-	"cSpell.words": [
-		"escodegen",
-		"resizer",
-		"sveltejs"
-	],
-	"editor.defaultFormatter": "svelte.svelte-vscode",
+	"cSpell.words": ["escodegen", "resizer", "sveltejs", "tailwindcss"],
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.codeActionsOnSave": {
 		"source.fixAll": true,
 		"source.organizeImports": true
 	},
 	"editor.formatOnSave": true,
-	"[typescript]": {
-		"editor.defaultFormatter": "vscode.typescript-language-features"
-	},
-	"[json]": {
-		"editor.defaultFormatter": "vscode.json-language-features"
+	"[svelte]": {
+		"editor.defaultFormatter": "svelte.svelte-vscode"
 	},
 	"files.exclude": {
 		"**/.git": true,

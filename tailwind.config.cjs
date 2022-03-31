@@ -1,15 +1,9 @@
 module.exports = {
-    content: ["./src/**/*.{html,js,svelte,ts}"],
-    darkMode: "class",
-    theme: {
-        extend: {}
-    },
-    plugins: [
-        require("@tailwindcss/typography")
-    ],
-    purge: {
-        options: {
-            safelist: ["bg-red-600", "bg-green-600"],
-        }
-    }
+	content: ["./src/**/*.{html,js,svelte,ts}"],
+	darkMode: "class",
+	theme: {
+		extend: {}
+	},
+	plugins: [require("@tailwindcss/typography")],
+	safelist: ["bg-red-600", "bg-green-600"]
 }

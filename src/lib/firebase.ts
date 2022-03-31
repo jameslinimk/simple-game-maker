@@ -56,12 +56,12 @@ export const createProject = async (code: string): Promise<Response<string>> => 
 	const _projects = await getProjects()
 	if (_projects[1] !== null) return [null, _projects[1]]
 
-	const projects = Object.keys(_projects[0])
+	const projects = Object.keys(_projects[0] || {})
 
 	let pid = id()
 	while (projects.includes(pid)) pid = id()
 
-	updateUserData({ [pid]: code }, "/projects")
+	await updateUserData({ [pid]: code }, "/projects")
 	return [pid, null]
 }
 
@@ -78,16 +78,15 @@ const log = (label: string, ...messages: any[]) => {
 // TODO run tests
 export const generalTests = async () => {
 	console.log(chalk.blue.bold("Starting generalTests..."))
-	log("user data", await getUserData()[0])
-	await updateUserData("test", "/test")
+	log("user data", (await getUserData())[0])
 }
 
 // generalTests()
 
 export const projectFuncsTest = async () => {
 	console.log(chalk.blue.bold("Starting projectFuncsTest..."))
-	log("projects", await getProjects()[0])
+	log("projects", (await getProjects())[0])
 	console.log("Created a project with id of", await createProject("Hello world!"))
-	log("projects", await getProjects()[0])
+	log("projects", (await getProjects())[0])
 }
 // projectFuncsTest()

@@ -1,25 +1,25 @@
 <script lang="ts">
-	import optionValues from "$lib/optionValues";
-	import { slide } from "svelte/transition";
+	import optionValues from "$lib/optionValues"
+	import { slide } from "svelte/transition"
 
 	export let options: {
 		[key: string]: {
-			checkboxOptions: [label: string, onToggle: (on: boolean) => any, defaultValue: boolean][];
-			dropdownOptions: [label: string, options: [label: string, value: string][], onChange: (value: string) => any, defaultValue: string][];
-		};
-	};
+			checkboxOptions: [label: string, onToggle: (on: boolean) => any, defaultValue: boolean][]
+			dropdownOptions: [label: string, options: [label: string, value: string][], onChange: (value: string) => any, defaultValue: string][]
+		}
+	}
 
 	Object.keys(options).forEach((key) => {
 		if ($optionValues[key] === undefined) {
-			$optionValues[key] = [{}, {}];
+			$optionValues[key] = [{}, {}]
 			options[key].checkboxOptions.forEach((option, i) => {
-				$optionValues[key][0][i] = option[2];
-			});
+				$optionValues[key][0][i] = option[2]
+			})
 			options[key].dropdownOptions.forEach((option, i) => {
-				$optionValues[key][1][i] = option[3];
-			});
+				$optionValues[key][1][i] = option[3]
+			})
 		}
-	});
+	})
 </script>
 
 <div in:slide out:slide class="absolute top-0 right-0 bottom-0 left-0 bg-slate-300 dark:bg-gray-700 z-10 p-3 m-5 shadow-lg shadow-black">
@@ -38,10 +38,11 @@
 							on:click={(event) => {
 								{
 									// @ts-ignore: Will always have checked (cant use casting in non script tag in svelte ">:(")
-									const checked = event.target.checked;
+									const checked = event.target.checked
 
-									$optionValues[key][0][i] = checked;
-									option[1](checked);
+									// @ts-ignore: Exists?
+									$optionValues[key][0][i] = checked
+									option[1](checked)
 								}
 							}}
 						/>
@@ -61,10 +62,11 @@
 						value={$optionValues[key][1][i]}
 						on:change={(event) => {
 							// @ts-ignore: Will always have checked (cant use casting in non script tag in svelte ">:(")
-							const value = event.target.value;
+							const value = event.target.value
 
-							$optionValues[key][1][i] = value;
-							option[2](value);
+							// @ts-ignore: Exists?
+							$optionValues[key][1][i] = value
+							option[2](value)
 						}}
 					>
 						{#each option[1] as subOption}

@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { auth } from "$lib/firebase";
-	import { signOut } from "firebase/auth";
-	import { onMount } from "svelte";
+	import { auth } from "$lib/firebase"
+	import { signOut } from "firebase/auth"
+	import { onMount } from "svelte"
 
-	let prevLink = "/";
+	let prevLink = "/"
 	onMount(() => {
-		const params = new URLSearchParams(window.location.search);
-		prevLink = params.get("prevLink") || "/";
-	});
+		const params = new URLSearchParams(window.location.search)
+		prevLink = params.get("prevLink") || "/"
+	})
 
-	let error = false;
+	let error = false
 	const signout = auth.currentUser
 		? signOut(auth).catch((err) => {
-				console.log("%cError (formatting code):", "color: #DC2626; font-weight: 800", err);
-				error = true;
+				console.log("%cError (formatting code):", "color: #DC2626; font-weight: 800", err)
+				error = true
 		  })
-		: "no account";
+		: "no account"
 </script>
 
 <div class="h-full m-0 left-0 top-0 fixed w-full grid place-content-center bg-slate-400">
@@ -42,7 +42,12 @@
 					{/await}
 				{/if}
 			</div>
-			<a href="/login" class="bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"> Log in </a>
+			<a
+				href="/login"
+				class="bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
+			>
+				Log in
+			</a>
 		</div>
 	</div>
 </div>

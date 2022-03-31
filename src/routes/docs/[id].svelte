@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { categories } from "$lib/docs/docs";
-	import toggles from "$lib/docs/toggles";
+	import { categories } from "$lib/docs/docs"
+	import toggles from "$lib/docs/toggles"
 
-	export let html: string;
-	export let currentPage: string;
+	export let html: string
+	export let currentPage: string
 </script>
 
 <div class="flex flex-1 bg-slate-200 dark:bg-slate-700">
@@ -18,7 +18,9 @@
 			>
 				{category}
 				{#if $toggles[category]}
-					<svg class="inline-block" fill="none" height="9" viewBox="0 0 14 9" width="14" xmlns="http://www.w3.org/2000/svg"><path d="m1 1 6 6 6-6" stroke="#000" stroke-width="2" /></svg>
+					<svg class="inline-block" fill="none" height="9" viewBox="0 0 14 9" width="14" xmlns="http://www.w3.org/2000/svg"
+						><path d="m1 1 6 6 6-6" stroke="#000" stroke-width="2" /></svg
+					>
 				{:else}
 					<svg class="inline-block mb-0.5" fill="none" height="14" viewBox="0 0 9 14" width="9" xmlns="http://www.w3.org/2000/svg"
 						><path d="m1 13 6-6-6-6" stroke="#000" stroke-width="2" /></svg
@@ -28,7 +30,10 @@
 			{#if $toggles[category]}
 				<div class="flex ml-[5%] flex-col">
 					{#each categories[category] as page}
-						<a href="/docs/{page}" class="pl-1 w-full capitalize bg-slate-200 dark:bg-slate-500 text-md font-semibold hover:dark:bg-slate-300 transition-all">
+						<a
+							href="/docs/{page}"
+							class="pl-1 w-full capitalize bg-slate-200 dark:bg-slate-500 text-md font-semibold hover:dark:bg-slate-300 transition-all"
+						>
 							{page}{currentPage === page ? " (selected)" : ""}
 						</a>
 					{/each}
