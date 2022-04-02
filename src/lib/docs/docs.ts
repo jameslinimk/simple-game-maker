@@ -4,5 +4,5 @@ export default {
 }
 
 export const categories: { [key: string]: string[] } = {
-	"Introduction": ["home"],
+	"Introduction": ["home", "test"],
 }

@@ -10,7 +10,7 @@
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
 		"postinstall": "patch-package",
-		"docs": "tsc src\\lib\\docs\\docGen.ts --target esnext --allowSyntheticDefaultImports true & node src\\lib\\docs\\docGen",
+		"docs": "tsc src/lib/docs/docGen.ts --target esnext --allowSyntheticDefaultImports true & node src/lib/docs/docGen",
 		"publish": "tsc build.ts --target esnext & node build"
 	},
 	"devDependencies": {
