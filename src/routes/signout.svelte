@@ -3,10 +3,10 @@
 	import { signOut } from "firebase/auth"
 	import { onMount } from "svelte"
 
-	let prevLink = "/"
+	let prevLink = ""
 	onMount(() => {
 		const params = new URLSearchParams(window.location.search)
-		prevLink = params.get("prevLink") || "/"
+		prevLink = params.get("prevLink") || ""
 	})
 
 	let error = false
@@ -43,7 +43,7 @@
 				{/if}
 			</div>
 			<a
-				href="/login"
+				href="login"
 				class="bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
 			>
 				Log in

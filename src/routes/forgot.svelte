@@ -5,10 +5,10 @@
 	import { sendPasswordResetEmail } from "firebase/auth"
 	import { onMount } from "svelte"
 
-	let prevLink = "/"
+	let prevLink = ""
 	onMount(() => {
 		const params = new URLSearchParams(window.location.search)
-		prevLink = params.get("prevLink") || "/"
+		prevLink = params.get("prevLink") || ""
 	})
 
 	let email: string

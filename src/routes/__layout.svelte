@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { dev, fullBasePath } from "$lib/conf"
 	import Navbar from "$lib/navbar.svelte"
 	import Popups from "$lib/popup.svelte"
 	import { themeLightOrDark } from "$lib/themeData"
@@ -19,6 +20,10 @@
 		}
 	})
 </script>
+
+<svelte:head>
+	<base href={!dev ? fullBasePath : "/"} target="_blank" />
+</svelte:head>
 
 <div class="flex flex-col absolute left-0 top-0 w-full h-full">
 	<Navbar />

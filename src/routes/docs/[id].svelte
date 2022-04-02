@@ -31,7 +31,7 @@
 				<div class="flex ml-[5%] flex-col">
 					{#each categories[category] as page}
 						<a
-							href="/docs/{page}"
+							href="docs/{page}"
 							class="pl-1 w-full capitalize bg-slate-200 dark:bg-slate-500 text-md font-semibold hover:dark:bg-slate-300 transition-all"
 						>
 							{page}{currentPage === page ? " (selected)" : ""}

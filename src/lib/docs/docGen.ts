@@ -6,7 +6,7 @@ const code: string[] = ["export default {"]
 const categories: { [key: string]: string[] } = {}
 
 const walkPages = (directory: string, category?: string) => {
-	fs.readdirSync(directory).forEach(file => {
+	fs.readdirSync(directory).forEach((file) => {
 		const absolute = path.join(directory, file)
 		const lstat = fs.statSync(absolute)
 		if (lstat.isDirectory()) return walkPages(absolute, file)
@@ -28,7 +28,7 @@ walkPages("./src/lib/docs/pages")
 code.push("}", "")
 
 code.push("export const categories: { [key: string]: string[] } = {")
-Object.keys(categories).forEach(key => code.push(`\t"${key}": ["${categories[key].join('", "')}"],`))
+Object.keys(categories).forEach((key) => code.push(`\t"${key}": ["${categories[key].join('", "')}"],`))
 code.push("}", "")
 
 fs.writeFileSync("./src/lib/docs/docs.ts", code.join("\n"))

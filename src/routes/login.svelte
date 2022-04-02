@@ -4,11 +4,11 @@
 	import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
 	import { onMount } from "svelte"
 
-	let prevLink = "/"
+	let prevLink = ""
 	let type: "login" | "signup" = "login"
 	onMount(() => {
 		const params = new URLSearchParams(window.location.search)
-		prevLink = params.get("prevLink") || "/"
+		prevLink = params.get("prevLink") || ""
 		const rawType = params.get("type")
 		type = rawType === "signup" || rawType === "login" ? rawType : "login"
 	})
@@ -109,11 +109,9 @@
 	<div class="grid place-items-center bg-slate-700 h-fit rounded-md p-5 gap-2 w-96 shadow-md shadow-black">
 		{#if $userObservable}
 			<div class="flex gap-2 w-full">
-				<div class="text-2xl font-semibold text-white bg-slate-800 pr-2 pl-2 rounded-md shadow-black shadow-sm inline-block w-48">
-					You are already logged in!
-				</div>
+				<div class="text-2xl font-semibold text-white pr-2 pl-2 rounded-md inline-block w-48">You are already logged in!</div>
 				<a
-					href="/signout"
+					href="signout"
 					class="grid place-items-center flex-1 bg-blue-500 p-2 text-xl rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
 				>
 					Sign out
@@ -208,7 +206,7 @@
 				</button>
 				{#if type === "login"}
 					<a
-						href="/forgot?prevLink=/login"
+						href="forgot?prevLink=/login"
 						class="mt-2 mr-1 ml-1 bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"
 					>
 						Forgot your password?

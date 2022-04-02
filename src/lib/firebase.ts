@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app"
 import { browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence } from "firebase/auth"
-import { child, get, getDatabase, ref, set, update } from "firebase/database"
+import { child, get, getDatabase, ref, remove, set, update } from "firebase/database"
 import { writable } from "svelte/store"
 import id from "./id"
 
@@ -33,11 +33,17 @@ export const overrideUserData = async (data: { [key: string]: any }, optionalPat
 	return [true, null]
 }
 
+export const deleteUserData = async (optionalPath = ""): Promise<Response<true>> => {
+	if (!auth.currentUser) return [null, "not logged in"]
+	await remove(ref(database, `users/${auth.currentUser.uid}${optionalPath}`))
+	return [true, null]
+}
+
 export const getUserData = async (optionalPath = ""): Promise<Response<any, "no data">> => {
 	if (!auth.currentUser) return [null, "not logged in"]
 
 	let error = false
-	const snapshot = await get(child(ref(database), `users/${auth.currentUser.uid}${optionalPath}`)).catch(err => {
+	const snapshot = await get(child(ref(database), `users/${auth.currentUser.uid}${optionalPath}`)).catch((err) => {
 		error = true
 		return err
 	})
@@ -45,7 +51,7 @@ export const getUserData = async (optionalPath = ""): Promise<Response<any, "no 
 	return [snapshot.val(), null]
 }
 
-export const getProjects = () => <Promise<Response<{ [key: string]: string }>>><unknown>getUserData("/projects")
+export const getProjects = () => <Promise<Response<{ [key: string]: string }>>>(<unknown>getUserData("/projects"))
 
 /**
  * Creates a project and saves it to the user

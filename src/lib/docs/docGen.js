@@ -4,7 +4,7 @@ import path from "path";
 const code = ["export default {"];
 const categories = {};
 const walkPages = (directory, category) => {
-    fs.readdirSync(directory).forEach(file => {
+    fs.readdirSync(directory).forEach((file) => {
         const absolute = path.join(directory, file);
         const lstat = fs.statSync(absolute);
         if (lstat.isDirectory())
@@ -25,7 +25,7 @@ const walkPages = (directory, category) => {
 walkPages("./src/lib/docs/pages");
 code.push("}", "");
 code.push("export const categories: { [key: string]: string[] } = {");
-Object.keys(categories).forEach(key => code.push(`\t"${key}": ["${categories[key].join('", "')}"],`));
+Object.keys(categories).forEach((key) => code.push(`\t"${key}": ["${categories[key].join('", "')}"],`));
 code.push("}", "");
 fs.writeFileSync("./src/lib/docs/docs.ts", code.join("\n"));
 console.log(categories);

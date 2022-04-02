@@ -1,6 +1,6 @@
 import adapter from "@sveltejs/adapter-static"
 import preprocess from "svelte-preprocess"
-import { dev } from "./src/lib/conf.js"
+import { basePath, dev } from "./src/lib/conf.js"
 
 /** @type {import("@sveltejs/kit").Config} */
 const config = {
@@ -12,7 +12,7 @@ const config = {
 
 		// For deployment
 		paths: {
-			base: dev ? "" : "/simple-game-maker"
+			base: dev ? "" : basePath
 		}
 	}
 }
