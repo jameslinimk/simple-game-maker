@@ -1,7 +1,7 @@
 import type { Ace } from "ace-builds"
 import escodegen from "escodegen"
 import type { parsedTokens, Statement } from "esprima-next"
-import esprima, { Syntax } from "esprima-next"
+import { parse, Syntax } from "esprima-next"
 import { format } from "prettier"
 import parserBabel from "prettier/esm/parser-babel.mjs"
 import { addPopup } from "./popup"
@@ -26,12 +26,12 @@ export default (editor: Ace.Editor, prettierFormat: {}) => {
 }
 
 const varName = "__iterationCounts__"
-const loopCheckHead: Statement[] = (<any>esprima.parse(`const ${varName} = {}`).body[0])
-const loopCheck = (id: string): Statement[] => (<any>esprima.parse(`while(true){if (${varName}["${id}"] === undefined) ${varName}["${id}"] = 0;${varName}["${id}"]++;if (${varName}["${id}"] >= 15000) throw new Error("Loop exceeds 15000 iterations. Check for an infinite loop!")}`).body[0]).body.body
+const loopCheckHead: Statement[] = (<any>parse(`const ${varName} = {}`).body[0])
+const loopCheck = (id: string): Statement[] => (<any>parse(`while(true){if (${varName}["${id}"] === undefined) ${varName}["${id}"] = 0;${varName}["${id}"]++;if (${varName}["${id}"] >= 15000) throw new Error("Loop exceeds 15000 iterations. Check for an infinite loop!")}`).body[0]).body.body
 export const formatCodeExecution = (code: string) => {
 	let tokens: parsedTokens | Statement[]
 	try {
-		tokens = esprima.parse(code)
+		tokens = parse(code)
 	} catch (error) {
 		console.log("%cError (instrumenting code):", "color: #DC2626; font-weight: 800", error)
 		return addPopup("There was an error while executing!", error)

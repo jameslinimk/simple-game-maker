@@ -1,4 +1,3 @@
-import chalk from "chalk"
 import { initializeApp } from "firebase/app"
 import { browserLocalPersistence, getAuth, setPersistence } from "firebase/auth"
 import { child, get, getDatabase, ref, set, update } from "firebase/database"
@@ -70,21 +69,21 @@ export const createProject = async (code: string): Promise<Response<string>> => 
 /* -------------------------------------------------------------------------- */
 
 const log = (label: string, ...messages: any[]) => {
-	console.log(`${chalk.green("=".repeat(3))} ${chalk.blueBright(label)} ${chalk.green("=".repeat(3))}`)
+	console.log(`%c${"=".repeat(3)} %c${label} %c${"=".repeat(3)}`, "color: green", "color: blue", "color: green")
 	console.log(...messages)
-	console.log(chalk.green("=".repeat(label.length + 8)))
+	console.log(`%c${"=".repeat(label.length + 8)}`, "color: green")
 }
 
 // TODO run tests
 export const generalTests = async () => {
-	console.log(chalk.blue.bold("Starting generalTests..."))
+	console.log("%cStarting generalTests...", "color: blue")
 	log("user data", (await getUserData())[0])
 }
 
 // generalTests()
 
 export const projectFuncsTest = async () => {
-	console.log(chalk.blue.bold("Starting projectFuncsTest..."))
+	console.log("%cStarting projectFuncsTest...", "color: blue")
 	log("projects", (await getProjects())[0])
 	console.log("Created a project with id of", await createProject("Hello world!"))
 	log("projects", (await getProjects())[0])
