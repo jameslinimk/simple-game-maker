@@ -1,28 +1,30 @@
+import consoleOutput from "./consoleOutput"
 import { formatCodeExecution } from "./format"
 import _sGame from "./game/sGame"
 import { addPopup } from "./popup"
 
 export default async (code: string) => {
-	const formattedCode = formatCodeExecution(code)
-	if (!formattedCode) return
-
-	const consoleOutput: any[] = [{ newConsoleOutput: true, date: Date.now() }]
+	code = <string>formatCodeExecution(code)
+	if (!code) return
 
 	const sGame = _sGame
 	sGame.stop()
 	sGame.start()
 
+	// Separator
+	consoleOutput.update(v => [...v, { newConsoleOutput: true, date: Date.now() }])
+
 	const tempLog = console.log
-	console.log = (...data: any[]) => (consoleOutput.push(data))
+	console.log = (...data: any[]) => consoleOutput.update(v => [...v, ...data])
+
 	try {
-		await eval(formattedCode)
+		await eval(code)
 	} catch (error) {
 		addPopup("Error while executing main function!", error)
-		sGame.stop()
+		sGame.stop(error)
 		console.log = tempLog
-		return [error]
+		return
 	}
 
 	console.log = tempLog
-	return consoleOutput
 }

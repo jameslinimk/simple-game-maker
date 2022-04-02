@@ -110,14 +110,13 @@
 
 	let consoleOutputAutoScroll: boolean
 
-	let consoleOutput: any[] = [{ newConsoleOutput: true, date: Date.now() }]
 	const play = async () => {
 		if ($running) {
 			sGame.stop()
 			return
 		}
 
-		consoleOutput = [...consoleOutput, ...(await execute(editor.getValue()))]
+		await execute(editor.getValue())
 	}
 
 	/**
@@ -266,7 +265,7 @@
 		</div>
 		<div id="resizer2" class="h-2 bg-slate-300 dark:bg-slate-600 cursor-ns-resize z-40" data-direction="vertical" />
 		<div class="bg-slate-100 dark:bg-gray-800 flex-1 text-2xl font-semibold text-black dark:text-white overflow-auto">
-			<ConsoleOutput {consoleOutput} bind:autoScroll={consoleOutputAutoScroll} />
+			<ConsoleOutput bind:autoScroll={consoleOutputAutoScroll} />
 		</div>
 	</div>
 </div>

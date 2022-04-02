@@ -1,9 +1,10 @@
 import { initializeApp } from "firebase/app"
-import { browserLocalPersistence, getAuth, setPersistence } from "firebase/auth"
+import { browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence } from "firebase/auth"
 import { child, get, getDatabase, ref, set, update } from "firebase/database"
+import { writable } from "svelte/store"
 import id from "./id"
 
-const app = initializeApp({
+initializeApp({
 	apiKey: "AIzaSyCXscgIJHdk56IRXyNP8jaD8qg5Ivu5wRw",
 	authDomain: "simple-game-maker.firebaseapp.com",
 	projectId: "simple-game-maker",
@@ -89,3 +90,8 @@ export const projectFuncsTest = async () => {
 	log("projects", (await getProjects())[0])
 }
 // projectFuncsTest()
+
+export const userObservable = writable(auth.currentUser)
+onAuthStateChanged(auth, (user) => {
+	userObservable.set(user)
+})

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { auth } from "./firebase"
+	import { userObservable } from "./firebase"
 </script>
 
 <div class="relative flex bg-slate-300 dark:bg-slate-500 w-full z-10 p-2 pt-2 pb-2 h-12">
 	<!-- LEFT -->
 	<div class="absolute top-1/2 -translate-y-1/2 flex gap-2">
-		{#if !auth.currentUser}
+		{#if !$userObservable}
 			<a
 				href="/login?type=signup"
 				class="bg-slate-400 dark:bg-slate-700 shadow-sm shadow-black rounded-2xl p-1 text-white hover:rounded-lg hover:scale-[1.1] transition-all duration-300"
@@ -14,17 +14,17 @@
 			</a>
 		{:else}
 			<a
-				href="/account"
+				href="/projects"
 				class="bg-slate-400 dark:bg-slate-700 shadow-sm shadow-black rounded-2xl p-1 text-white hover:rounded-lg hover:scale-[1.1] transition-all duration-300"
 			>
 				Projects
 			</a>
 		{/if}
 		<a
-			href={auth.currentUser ? "/signout" : "/login"}
+			href={$userObservable ? "/signout" : "/login"}
 			class="bg-slate-400 dark:bg-slate-700 shadow-sm shadow-black rounded-2xl p-1 text-white hover:rounded-lg hover:scale-[1.1] transition-all duration-300"
 		>
-			{auth.currentUser ? "Sign out" : "Log in"}
+			{$userObservable ? "Sign out" : "Log in"}
 		</a>
 	</div>
 

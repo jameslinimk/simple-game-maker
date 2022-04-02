@@ -12,6 +12,10 @@
 				return
 			}
 			document.documentElement.classList.add("dark")
+		} else {
+			// Default theme is dark
+			localStorage.setItem("theme", "dark")
+			document.documentElement.classList.add("dark")
 		}
 	})
 </script>

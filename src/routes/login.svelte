@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { auth, generalTests, overrideUserData, projectFuncsTest } from "$lib/firebase"
+	import { auth, generalTests, overrideUserData, projectFuncsTest, userObservable } from "$lib/firebase"
 	import firebaseCodes from "$lib/firebaseCodes"
 	import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
 	import { onMount } from "svelte"
@@ -107,7 +107,7 @@
 		Go back
 	</a>
 	<div class="grid place-items-center bg-slate-700 h-fit rounded-md p-5 gap-2 w-96 shadow-md shadow-black">
-		{#if auth.currentUser}
+		{#if $userObservable}
 			<div class="flex gap-2 w-full">
 				<div class="text-2xl font-semibold text-white bg-slate-800 pr-2 pl-2 rounded-md shadow-black shadow-sm inline-block w-48">
 					You are already logged in!

@@ -18,7 +18,7 @@ class sGame {
 	constructor() {
 		this._running = false
 
-		this.onFrame = () => { }
+		this.onFrame = () => {}
 	}
 
 	async start() {
@@ -31,11 +31,11 @@ class sGame {
 		}, 1000 / 60)
 	}
 
-	stop() {
+	stop(reason?: string) {
 		if (!this._running) return
 
 		this._running = false
-		console.log("stopping")
+		console.log(`Stopping execution${reason ? ` because: "${reason}"` : "!"}`)
 		running.set(false)
 		clearInterval(this.gameLoop)
 	}
