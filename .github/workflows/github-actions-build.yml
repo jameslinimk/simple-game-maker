@@ -19,6 +19,8 @@ jobs:
                   git config --global user.email "jameskimimk@gmail.com"
                   git config --global user.name "Linimik"
                   git remote set-url origin https://jameslinimk:${{ secrets.PASSWORD }}@github.com/jameslinimk/simple-game-maker.git
+            - name: Toggle dev
+              run: npm run devOff
             - name: Build docs
               run: npm run docs
             - name: Build website

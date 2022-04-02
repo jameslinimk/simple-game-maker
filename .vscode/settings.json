@@ -17,7 +17,8 @@
 		"**/.DS_Store": true,
 		"**/Thumbs.db": true,
 		"**/docGen.js": true,
-		"**/build.js": true
+		"**/build.js": true,
+		"**/toggleDev.js": true
 	},
 	"[typescript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
