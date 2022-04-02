@@ -1,5 +1,5 @@
 {
-	"cSpell.words": ["escodegen", "jameslinimk", "Linimik", "resizer", "sveltejs", "tailwindcss"],
+	"cSpell.words": ["deps", "escodegen", "jameslinimk", "Linimik", "resizer", "sveltejs", "tailwindcss"],
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.codeActionsOnSave": {
 		"source.fixAll": true,
@@ -18,5 +18,8 @@
 		"**/Thumbs.db": true,
 		"**/docGen.js": true,
 		"**/build.js": true
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }
