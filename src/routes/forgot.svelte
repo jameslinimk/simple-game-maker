@@ -1,14 +1,15 @@
 <script lang="ts">
+	import { parseHref } from "$lib/conf"
 	import { auth } from "$lib/firebase"
 	import firebaseCodes from "$lib/firebaseCodes"
 	import { addPopup } from "$lib/popup"
 	import { sendPasswordResetEmail } from "firebase/auth"
 	import { onMount } from "svelte"
 
-	let prevLink = ""
+	let prevLink = "/"
 	onMount(() => {
 		const params = new URLSearchParams(window.location.search)
-		prevLink = params.get("prevLink") || ""
+		prevLink = params.get("prevLink") || "/"
 	})
 
 	let email: string
@@ -44,7 +45,7 @@
 
 <div class="h-full m-0 left-0 top-0 fixed w-full flex justify-center items-center bg-slate-400">
 	<a
-		href={prevLink}
+		href={parseHref(prevLink)}
 		class="bg-blue-500 p-2 text-2xl rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300 absolute left-3 bottom-3"
 	>
 		Go back

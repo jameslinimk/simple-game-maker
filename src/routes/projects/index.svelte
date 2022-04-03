@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { parseHref } from "$lib/conf"
 	import { deleteUserData, getProjects, userObservable } from "$lib/firebase"
 	import { onDestroy } from "svelte"
 	import { fade } from "svelte/transition"
@@ -16,7 +17,7 @@
 <div class="flex-1 bg-slate-500">
 	<div class="w-full dark:bg-slate-700 dark:text-white text-2xl font-semibold p-2">
 		Your projects:
-		<a href="new" class="underline float-right">New project+</a>
+		<a href={parseHref("/new")} class="underline float-right">New project+</a>
 	</div>
 	{#await projects}
 		<div>Getting projects...</div>
@@ -24,7 +25,7 @@
 		{#if error}
 			<div>
 				{#if error === "not logged in"}
-					You are not logged in, click <a href="login">here</a> to login!
+					You are not logged in, click <a href={parseHref("/login")}>here</a> to login!
 				{:else}
 					{error}
 				{/if}
@@ -44,7 +45,7 @@
 						>
 					</button>
 
-					<a href="projects/{name}">
+					<a href={parseHref(`/projects/${name}`)}>
 						<div class="font-semibold inline-block w-6">
 							{i + 1}
 						</div>

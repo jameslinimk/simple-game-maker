@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { parseHref } from "$lib/conf"
 	import { categories } from "$lib/docs/docs"
 	import toggles from "$lib/docs/toggles"
 
@@ -31,7 +32,7 @@
 				<div class="flex ml-[5%] flex-col">
 					{#each categories[category] as page}
 						<a
-							href="docs/{page}"
+							href={parseHref(`/docs/${page}`)}
 							class="pl-1 w-full capitalize bg-slate-200 dark:bg-slate-500 text-md font-semibold hover:dark:bg-slate-300 transition-all"
 						>
 							{page}{currentPage === page ? " (selected)" : ""}
