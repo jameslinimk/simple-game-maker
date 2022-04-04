@@ -12,7 +12,7 @@
 	})
 </script>
 
-<div class="flex flex-col gap-2">
+<div class="flex-1 bg-slate-100 dark:bg-gray-800 flex flex-col gap-2 text-white overflow-auto">
 	{#each $consoleOutput as output, i}
 		{#if typeof output === "object" && "newConsoleOutput" in output && output.newConsoleOutput === true && "date" in output && typeof output.date === "number"}
 			<div class="bg-slate-200 dark:bg-slate-500 text-base font-semibold p-1">

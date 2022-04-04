@@ -17,7 +17,7 @@
 <div class="flex-1 bg-slate-500">
 	<div class="w-full dark:bg-slate-700 dark:text-white text-2xl font-semibold p-2">
 		Your projects:
-		<a href={parseHref("/new")} class="underline float-right">New project+</a>
+		<a href={parseHref("/projects/new")} class="underline float-right">New project+</a>
 	</div>
 	{#await projects}
 		<div>Getting projects...</div>

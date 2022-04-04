@@ -2,8 +2,10 @@
 	import { parseHref } from "$lib/conf"
 	import { auth, generalTests, overrideUserData, projectFuncsTest, userObservable } from "$lib/firebase"
 	import firebaseCodes from "$lib/firebaseCodes"
+	import metatags from "$lib/metatags"
 	import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
 	import { onMount } from "svelte"
+	import { MetaTags } from "svelte-meta-tags"
 
 	let prevLink = "/"
 	let type: "login" | "signup" = "login"
@@ -100,6 +102,14 @@
 	let generalError: false | string = false
 </script>
 
+<MetaTags
+	{...metatags({
+		title: "Login",
+		description: "Login to your Simple Game Maker account to save, view, and publish your games!",
+		urlRelativePath: "/login"
+	})}
+/>
+
 <div class="h-full m-0 left-0 top-0 fixed w-full grid place-content-center bg-slate-400">
 	<a
 		href={parseHref(prevLink)}
@@ -110,7 +120,7 @@
 	<div class="grid place-items-center bg-slate-700 h-fit rounded-md p-5 gap-2 w-96 shadow-md shadow-black">
 		{#if $userObservable}
 			<div class="flex gap-2 w-full">
-				<div class="text-2xl font-semibold text-white pr-2 pl-2 rounded-md inline-block w-48">You are already logged in!</div>
+				<div class="text-4xl font-semibold text-white pr-2 pl-2 rounded-md inline-block w-48">Logged in!</div>
 				<a
 					href={parseHref("/signout")}
 					class="grid place-items-center flex-1 bg-blue-500 p-2 text-xl rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"

@@ -6,6 +6,7 @@ console.log(arg)
 const mode = arg === "true" || arg === "false" ? arg : "true"
 const code = `export const dev = ${mode}
 export const basePath = "/simple-game-maker"
+export const baseURL = "https://jameslinimk.github.io/simple-game-maker"
 
 /**
  * @param {string} path

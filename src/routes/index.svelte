@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { parseHref } from "$lib/conf"
 	import ConsoleOutput from "$lib/consoleOutput.svelte"
 	import currentProject from "$lib/currentProject"
 	import execute from "$lib/execute"
 	import { deleteUserData, getUserData, updateUserData, userObservable } from "$lib/firebase"
 	import format from "$lib/format"
 	import sGame, { running } from "$lib/game/sGame"
+	import metatags from "$lib/metatags"
 	import OptionMenu from "$lib/optionMenu.svelte"
 	import { addPopup } from "$lib/popup"
 	import resizeable from "$lib/resizeable"
@@ -12,13 +14,17 @@
 	import { themeData, themeLightOrDark } from "$lib/themeData"
 	import type { Ace } from "ace-builds"
 	import { onDestroy, onMount } from "svelte"
+	import { MetaTags } from "svelte-meta-tags"
 	import { fade } from "svelte/transition"
 
+	const testCode =
+		'var foo = false\nlet bar = true\nconst FOO = "hello world!"\n\nif (foo) {\n\tconsole.log("Hello world!")\n} else {\n\tconsole.log("Goodbye world!")\n}\n\nfunction square(number) {\n\treturn number * number\n}\nconst squareAnon = (number) => number * number\n\nconst emotions = [":)", ":(", ">:(", ">:)", "<3"]\n\nconst car = {\n\tname: "Tesla",\n\tyear: "2025",\n}\n\nclass Person {\n\tconstructor(name, age) {\n\t\tthis.name = name\n\t\tthis.age = age\n\t}\n\n\tinfo() {\n\t\tconsole.log(`${this.name} is ${this.age} years old!`)\n\t}\n}\n\nasync function main() {\n\tconsole.log("Async function!")\n}\n\ndo {\n\tlet test = false\n} while (true)\n\nwhile (true) {\n\tlet test2 = true\n}\n'
+
 	let editor: Ace.Editor
+	let unsaved = false
+	let ogCode: string
+
 	onMount(async () => {
-		/* -------------------------------------------------------------------------- */
-		/*                                 Ace editor                                 */
-		/* -------------------------------------------------------------------------- */
 		const { config, edit } = await import("ace-builds")
 		await import("ace-builds/src-noconflict/ext-language_tools")
 
@@ -31,9 +37,10 @@
 			enableLiveAutocompletion: true,
 			theme: "ace/theme/one_dark",
 			mode: "ace/mode/javascript",
-			value: 'var foo = false\nlet bar = true\nconst FOO = "hello world!"\n\nif (foo) {\n\tconsole.log("Hello world!")\n} else {\n\tconsole.log("Goodbye world!")\n}\n\nfunction square(number) {\n\treturn number * number\n}\nconst squareAnon = (number) => number * number\n\nconst emotions = [":)", ":(", ">:(", ">:)", "<3"]\n\nconst car = {\n\tname: "Tesla",\n\tyear: "2025",\n}\n\nclass Person {\n\tconstructor(name, age) {\n\t\tthis.name = name\n\t\tthis.age = age\n\t}\n\n\tinfo() {\n\t\tconsole.log(`${this.name} is ${this.age} years old!`)\n\t}\n}\n\nasync function main() {\n\tconsole.log("Async function!")\n}\n\ndo {\n\tlet test = false\n} while (true)\n\nwhile (true) {\n\tlet test2 = true\n}\n',
+			value: testCode,
 			wrap: true
 		})
+		;[...document.getElementsByClassName("ace_scrollbar-v")].forEach((item: HTMLDivElement) => (item.style.width = "0"))
 		;(<any>editor.session.on)("changeMode", (_: any, session: any) => {
 			session.$worker.send("changeOptions", [
 				{
@@ -43,38 +50,15 @@
 				}
 			])
 		})
-		;[...document.getElementsByClassName("ace_scrollbar-v")].forEach((item: HTMLDivElement) => (item.style.width = "0"))
 
 		/* -------------------------------------------------------------------------- */
 		/*                                  Resizing                                  */
 		/* -------------------------------------------------------------------------- */
 		resizeable(<HTMLDivElement>document.getElementById("resizer1"), () => editor.resize())
 		resizeable(<HTMLDivElement>document.getElementById("resizer2"), () => editor.resize())
-
-		/* -------------------------------------------------------------------------- */
-		/*                             localStorage theme                             */
-		/* -------------------------------------------------------------------------- */
-		const localTheme = localStorage.getItem("theme")
-		if (localTheme && themeLightOrDark[localTheme]) toggleTheme(localTheme)
-
-		const localFontSize = parseInt(localStorage.getItem("fontSize"))
-		if (localFontSize) changeEditorFontSize(localFontSize)
-
-		const localSemicolons = localStorage.getItem("semicolons")
-		if (localSemicolons && (localSemicolons === "true" || localSemicolons === "false")) toggleSemicolons(localSemicolons === "true")
-
-		loadGivenProject()
-
-		/* -------------------------------------------------------------------------- */
-		/*                               burgerMenuOpen                               */
-		/* -------------------------------------------------------------------------- */
-		document.addEventListener("keydown", (event) => {
-			if (event.code !== "Escape") return
-			if (burgerMenuOpen) burgerMenuOpen = false
-			if (saveMenuOpen) saveMenuOpen = false
-		})
 	})
 
+	/* --------------------------------- Project -------------------------------- */
 	const loadGivenProject = async () => {
 		let params: URLSearchParams
 		try {
@@ -95,24 +79,50 @@
 		if (project) {
 			const [code] = await getUserData(`/projects/${project}`)
 			if (code) {
+				ogCode = code
+
 				$currentProject = project
-				editor.session.setValue(code)
+				if (editor) editor.session.setValue(code)
+
 				localStorage.setItem("project", project)
 			}
 		}
+
+		console.log(editor)
+
+		if (editor && !ogCode) ogCode = editor.getValue()
+		if (editor)
+			editor.getSession().on(<any>"change", () => {
+				if (editor.getValue() !== ogCode) unsaved = true
+				else unsaved = false
+			})
 	}
+	$: if (editor) loadGivenProject()
 
 	const unsubscribe = userObservable.subscribe(() => {
 		loadGivenProject()
 	})
 	onDestroy(unsubscribe)
 
+	/* ------------------------------- Burger menu ------------------------------ */
 	let burgerMenuOpen = false
+	onMount(() =>
+		document.addEventListener("keydown", (event) => {
+			if (event.code !== "Escape") return
+			if (burgerMenuOpen) burgerMenuOpen = false
+			if (saveMenuOpen) saveMenuOpen = false
+		})
+	)
+
 	let saveMenuOpen = false
 
+	/* ---------------------------------- Theme --------------------------------- */
 	let currentTheme = "one_dark"
-	const toggleTheme = (theme: string) => {
-		editor.setTheme(`ace/theme/${theme}`)
+	const toggleTheme = (theme?: string) => {
+		if (!theme) theme = localStorage.getItem("theme")
+		if (!themeLightOrDark[theme]) return
+
+		if (editor) editor.setTheme(`ace/theme/${theme}`)
 		localStorage.setItem("theme", theme)
 		currentTheme = theme
 		const mode = themeLightOrDark[theme]
@@ -122,16 +132,29 @@
 		}
 		document.documentElement.classList.add("dark")
 	}
+	$: if (editor) toggleTheme()
 
+	/* ---------------------------------- Font ---------------------------------- */
 	let currentFontSize = 12
-	const changeEditorFontSize = (fontSize: number) => {
+	const changeEditorFontSize = (fontSize?: number) => {
+		if (!fontSize) fontSize = parseInt(localStorage.getItem("fontSize"))
+		if (!fontSize) return
+
 		editor.setOption("fontSize", fontSize)
 		currentFontSize = fontSize
 		localStorage.setItem("fontSize", `${fontSize}`)
 	}
+	$: if (editor) changeEditorFontSize()
 
+	/* ------------------------------- Semicolons ------------------------------- */
 	let currentSemicolons = false
-	const toggleSemicolons = (on: boolean) => {
+	const toggleSemicolons = (on?: boolean) => {
+		if (on === undefined) {
+			const localSemicolons = localStorage.getItem("semicolons")
+			if (localSemicolons && (localSemicolons === "true" || localSemicolons === "false")) on = localSemicolons === "true"
+		}
+		if (on === undefined) return
+
 		if (editor.session.$worker) {
 			editor.session.$worker.send("changeOptions", [
 				{
@@ -143,7 +166,9 @@
 		currentSemicolons = on
 		localStorage.setItem("semicolons", `${on}`)
 	}
+	$: if (editor) toggleSemicolons()
 
+	/* ---------------------------------- Other --------------------------------- */
 	let consoleOutputAutoScroll: boolean
 
 	const play = async () => {
@@ -164,17 +189,45 @@
 	}
 
 	let deleteConfirm = false
+
+	$: try {
+		if (window) {
+			if (!unsaved) {
+				window.onbeforeunload = null
+			} else {
+				window.onbeforeunload = (event: BeforeUnloadEvent) => {
+					const confirmationMessage =
+						"It looks like you have been editing something. If you leave before saving, your changes will be lost."
+
+					event.preventDefault()
+					;(event || window.event).returnValue = confirmationMessage
+					return confirmationMessage
+				}
+			}
+		}
+	} catch (error) {}
 </script>
+
+<MetaTags
+	{...metatags({
+		title: "Main Page",
+		description:
+			"Simple Game Maker is a tool for beginner coders to create and publish their own games using Javascript. SGM has easy to read code with extensive and easy to understand documentation.",
+		urlRelativePath: ""
+	})}
+/>
 
 <div class="flex flex-1 flex-col">
 	<!-- /* -------------------------------------------------------------------------- */
 	/*                                   TOPBAR                                   */
 	/* -------------------------------------------------------------------------- */ -->
 	<div
-		class="dark:bg-slate-900 h-5 w-full hover:h-16 transition-all duration-300 dark:text-slate-300 text-sm grid place-items-center group relative"
+		class="bg-slate-100 dark:bg-slate-900 h-5 w-full hover:h-16 transition-all duration-300 dark:text-slate-300 text-sm grid place-items-center group relative"
 	>
 		<div class="group-hover:text-[0] transition-all duration-300">
-			{$currentProject ? `Working on "${$currentProject}" (Hover)` : "Not working on a project (Hover to create)"}
+			{$currentProject
+				? `Working on "${$currentProject}" (Hover)${unsaved ? " *unsaved changes" : ""}`
+				: `Not working on a project (Hover to create)${unsaved ? " *unsaved changes" : ""}`}
 		</div>
 		<div class="absolute top-0 left-0 w-full h-full group-hover:grid place-items-center hidden transition-all duration-300">
 			<div class="flex gap-5">
@@ -206,13 +259,14 @@
 					</div>
 				{/if}
 				<div class="flex flex-col">
-					<button
+					<a
+						href={parseHref("/projects/new")}
 						class="mt-1 bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 opacity-60 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="dark:fill-slate-800 fill-slate-300"
 							><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z" /></svg
 						>
-					</button>
+					</a>
 					<div class="mt-1">New</div>
 				</div>
 				{#if $currentProject}
@@ -377,9 +431,7 @@
 				<canvas id="gameCanvas" class="w-full h-full" bind:this={sGame.canvas} />
 			</div>
 			<div id="resizer2" class="h-2 bg-slate-300 dark:bg-slate-600 cursor-ns-resize z-40" data-direction="vertical" />
-			<div class="bg-slate-100 dark:bg-gray-800 flex-1 text-2xl font-semibold text-black dark:text-white overflow-auto">
-				<ConsoleOutput bind:autoScroll={consoleOutputAutoScroll} />
-			</div>
+			<ConsoleOutput bind:autoScroll={consoleOutputAutoScroll} />
 		</div>
 	</div>
 </div>

@@ -1,5 +1,6 @@
-export async function get({ params }) {
-	return {
-		body: { item: "test" }
-	}
-}
+import { parseHref } from "$lib/conf"
+
+export const get = async ({ params }) => ({
+	headers: { Location: parseHref(`/?project=${params.id}`) },
+	status: 302
+})
