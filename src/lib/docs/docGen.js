@@ -8,28 +8,6 @@ const code = ["export default {"]
 const categories = {}
 const descriptions = {}
 
-const indicesOf = (
-	/** @type {string} */ string,
-	/** @type {string} */ search,
-	/** @type {{ (i: number): void }} */ func,
-	/** @type {boolean} */ caseSensitive
-) => {
-	if (!search.length) return []
-
-	let startIndex = 0
-	let index
-
-	if (!caseSensitive) {
-		string = string.toLowerCase()
-		search = search.toLowerCase()
-	}
-
-	while ((index = string.indexOf(search, startIndex)) > -1) {
-		func(index)
-		startIndex = index + search.length
-	}
-}
-
 const walkPages = (/** @type {string} */ directory, /** @type {string} */ category) => {
 	fs.readdirSync(directory).forEach((file) => {
 		const absolute = path.join(directory, file)

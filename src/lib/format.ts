@@ -1,10 +1,10 @@
 import type { Ace } from "ace-builds"
 import escodegen from "escodegen"
-import type { parsedTokens, Statement } from "esprima-next"
-import { parse, Syntax } from "esprima-next"
+import { parse } from "espree"
 import { format } from "prettier"
 import parserBabel from "prettier/esm/parser-babel.mjs"
 import { addPopup } from "./popup"
+import { esEdition } from "./version"
 
 export default (editor: Ace.Editor, prettierFormat: {}) => {
 	if (editor.session.getAnnotations().filter((annotation) => annotation.type === "error").length > 0)
@@ -27,38 +27,26 @@ export default (editor: Ace.Editor, prettierFormat: {}) => {
 }
 
 const varName = "__iterationCounts__"
-const loopCheckHead: Statement[] = <any>parse(`const ${varName} = {}`).body[0]
-const loopCheck = (id: string): Statement[] =>
-	(<any>(
-		parse(
-			`while(true){if (${varName}["${id}"] === undefined) ${varName}["${id}"] = 0;${varName}["${id}"]++;if (${varName}["${id}"] >= 15000) throw new Error("Loop exceeds 15000 iterations. Check for an infinite loop!")}`
-		).body[0]
-	)).body.body
+const loopCheckHead = parse(`${esEdition >= 6 ? "const" : "var"} ${varName} = {}`, { ecmaVersion: esEdition }).body[0]
+
+const loopCheck = (id: number) =>
+	parse(
+		`if (${varName}["${id}"] === undefined) ${varName}["${id}"] = 0;${varName}["${id}"]++;if (${varName}["${id}"] >= 15000) throw new Error("Loop exceeds 15000 iterations. Check for an infinite loop!")`
+	).body
+const loopNames = ["WhileStatement", "DoWhileStatement", "ForInStatement", "ForStatement", "ForInStatement", "ForOfStatement"]
+
 export const formatCodeExecution = (code: string) => {
-	let tokens: parsedTokens
+	let parsed: any
 	try {
-		tokens = parse(code)
+		parsed = parse(code, { ecmaVersion: esEdition })
 	} catch (error) {
 		console.log("%cError (instrumenting code):", "color: #DC2626; font-weight: 800", error)
 		return addPopup("There was an error while executing!", error)
 	}
+	parsed.body = [loopCheckHead, ...parsed.body]
 
-	;(<any>tokens.body).unshift(loopCheckHead)
+	const loops = parsed.body.filter((body: any) => loopNames.includes(body.type))
+	loops.forEach((node: any, i: number) => (node.body.body = [...loopCheck(i), ...node.body.body]))
 
-	tokens.body
-		.filter((body) =>
-			[
-				Syntax.WhileStatement,
-				Syntax.DoWhileStatement,
-				Syntax.ForInStatement,
-				Syntax.ForStatement,
-				Syntax.ForInStatement,
-				Syntax.ForOfStatement
-			].includes(body.type)
-		)
-		.forEach((loop: any, i) => {
-			;(<any>loop).body.body = [...loopCheck(`${i}`), ...(<any>loop).body.body]
-		})
-
-	return escodegen.generate(tokens)
+	return escodegen.generate(parsed)
 }

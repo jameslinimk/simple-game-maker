@@ -42,8 +42,7 @@
 	"dependencies": {
 		"ace-builds": "^1.4.14",
 		"escodegen": "^2.0.0",
-		"esprima": "^4.0.1",
-		"esprima-next": "^5.8.1",
+		"espree": "^9.3.1",
 		"firebase": "^9.6.9",
 		"marked": "^4.0.12",
 		"moment": "^2.29.1",

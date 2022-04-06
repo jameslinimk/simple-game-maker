@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { parseHref } from "$lib/conf"
-	import { categories } from "$lib/docs/docs"
+	import { categories, descriptions } from "$lib/docs/docs"
 	import toggles from "$lib/docs/toggles"
 	import metatags from "$lib/metatags"
 	import { MetaTags } from "svelte-meta-tags"
@@ -14,6 +14,7 @@
 <MetaTags
 	{...metatags({
 		title: `${capital(currentPage)} | Docs`,
+		description: descriptions[currentPage],
 		urlRelativePath: `/docs/${currentPage}`
 	})}
 />
