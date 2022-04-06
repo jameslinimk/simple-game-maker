@@ -20,6 +20,10 @@
 	})
 </script>
 
+<svelte:head>
+	<script data-goatcounter="https://simple-game-maker.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</svelte:head>
+
 <div class="flex flex-col absolute left-0 top-0 w-full h-full">
 	<Navbar />
 	<slot />
