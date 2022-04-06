@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { parseHref } from "$lib/conf"
 	import { deleteUserData, getProjects, userObservable } from "$lib/firebase"
+	import metatags from "$lib/metatags"
 	import { onDestroy } from "svelte"
+	import { MetaTags } from "svelte-meta-tags"
 	import { fade } from "svelte/transition"
 
 	let projects = getProjects()
@@ -13,6 +15,14 @@
 
 	let confirmDelete: false | string = false
 </script>
+
+<MetaTags
+	{...metatags({
+		title: "Projects",
+		description: "Get a list of projects under your account",
+		urlRelativePath: "/projects"
+	})}
+/>
 
 <div class="flex-1 bg-slate-500">
 	<div class="w-full dark:bg-slate-700 dark:text-white text-2xl font-semibold p-2">

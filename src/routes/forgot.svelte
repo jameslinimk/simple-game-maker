@@ -2,9 +2,11 @@
 	import { parseHref } from "$lib/conf"
 	import { auth } from "$lib/firebase"
 	import firebaseCodes from "$lib/firebaseCodes"
+	import metatags from "$lib/metatags"
 	import { addPopup } from "$lib/popup"
 	import { sendPasswordResetEmail } from "firebase/auth"
 	import { onMount } from "svelte"
+	import { MetaTags } from "svelte-meta-tags"
 
 	let prevLink = "/"
 	onMount(() => {
@@ -42,6 +44,14 @@
 	let emailError: false | string = false
 	let generalError: false | string = false
 </script>
+
+<MetaTags
+	{...metatags({
+		title: "Forgot your password?",
+		description: "Reset your password by email",
+		urlRelativePath: "/forgot"
+	})}
+/>
 
 <div class="h-full m-0 left-0 top-0 fixed w-full flex justify-center items-center bg-slate-400">
 	<a

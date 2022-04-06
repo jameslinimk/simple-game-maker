@@ -1,0 +1,3 @@
+[build]
+command = "npm run devOff && npm run docs && npm run build"
+publish = "build"

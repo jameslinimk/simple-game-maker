@@ -12,10 +12,10 @@ export default async (code: string) => {
 	sGame.start()
 
 	// Separator
-	consoleOutput.update(v => [...v, { newConsoleOutput: true, date: Date.now() }])
+	consoleOutput.update((v) => [...v, { newConsoleOutput: true, date: Date.now() }])
 
 	const tempLog = console.log
-	console.log = (...data: any[]) => consoleOutput.update(v => [...v, ...data])
+	console.log = (...data: any[]) => consoleOutput.update((v) => [...v, ...data])
 
 	try {
 		await eval(code)

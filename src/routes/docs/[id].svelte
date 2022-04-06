@@ -2,10 +2,21 @@
 	import { parseHref } from "$lib/conf"
 	import { categories } from "$lib/docs/docs"
 	import toggles from "$lib/docs/toggles"
+	import metatags from "$lib/metatags"
+	import { MetaTags } from "svelte-meta-tags"
 
 	export let html: string
 	export let currentPage: string
+
+	const capital = (string: string) => string.charAt(0).toUpperCase() + string.slice(1)
 </script>
+
+<MetaTags
+	{...metatags({
+		title: `${capital(currentPage)} | Docs`,
+		urlRelativePath: `/docs/${currentPage}`
+	})}
+/>
 
 <div class="flex flex-1 bg-slate-200 dark:bg-slate-700">
 	<div class="w-1/6 bg-slate-100 dark:bg-slate-600 flex flex-col">

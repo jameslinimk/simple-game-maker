@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { parseHref } from "$lib/conf"
 	import { auth } from "$lib/firebase"
+	import metatags from "$lib/metatags"
 	import { signOut } from "firebase/auth"
 	import { onMount } from "svelte"
+	import { MetaTags } from "svelte-meta-tags"
 
 	let prevLink = "/"
 	onMount(() => {
@@ -10,9 +12,16 @@
 		prevLink = params.get("prevLink") || "/"
 	})
 
-	let error = false
 	let signout = signOut(auth)
 </script>
+
+<MetaTags
+	{...metatags({
+		title: "Signout",
+		description: "Signout of your account!",
+		urlRelativePath: "/signout"
+	})}
+/>
 
 <div class="h-full m-0 left-0 top-0 fixed w-full grid place-content-center bg-slate-400">
 	<a
@@ -23,7 +32,13 @@
 	</a>
 	<div class="grid place-items-center bg-slate-700 h-fit rounded-md p-5 gap-2 shadow-md shadow-black">
 		<div class="flex gap-2">
-			<div class="text-3xl font-semibold text-white pr-2 pl-2 rounded-md inline-block">Signed out!</div>
+			<div class="text-3xl font-semibold text-white pr-2 pl-2 rounded-md inline-block">
+				{#await signout}
+					Signing out...
+				{:then _}
+					Signed out!
+				{/await}
+			</div>
 			<a
 				href={parseHref("/login")}
 				class="bg-blue-500 p-2 text-md rounded-md shadow-sm shadow-black font-semibold text-white hover:scale-[1.1] hover:bg-slate-400 transition-all duration-300"

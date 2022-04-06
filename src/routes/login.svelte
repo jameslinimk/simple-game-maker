@@ -105,7 +105,7 @@
 <MetaTags
 	{...metatags({
 		title: "Login",
-		description: "Login to your Simple Game Maker account to save, view, and publish your games!",
+		description: "Login or signup to your account to save, view, and publish your games!",
 		urlRelativePath: "/login"
 	})}
 />

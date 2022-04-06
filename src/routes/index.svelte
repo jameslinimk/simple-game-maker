@@ -88,8 +88,6 @@
 			}
 		}
 
-		console.log(editor)
-
 		if (editor && !ogCode) ogCode = editor.getValue()
 		if (editor)
 			editor.getSession().on(<any>"change", () => {
