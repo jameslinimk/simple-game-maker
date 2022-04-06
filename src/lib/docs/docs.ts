@@ -5,7 +5,7 @@ export default {
 }
 
 export const categories: { [key: string]: string[] } = {
-	"Introduction": ["home\", \"test"],
+	"Introduction": ["home","test"]
 }
 
 export const descriptions: { [key: string]: string } = {

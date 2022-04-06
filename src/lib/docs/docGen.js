@@ -53,7 +53,7 @@ code.push("}", "")
 
 if (Object.keys(categories).length) {
 	code.push("export const categories: { [key: string]: string[] } = {")
-	Object.keys(categories).forEach((key) => code.push(`\t${JSON.stringify(key)}: [${JSON.stringify(categories[key].join('", "'))}],`))
+	Object.keys(categories).forEach((key) => code.push(`\t${JSON.stringify(key)}: ${JSON.stringify(categories[key])}`))
 	code.push("}", "")
 }
 
