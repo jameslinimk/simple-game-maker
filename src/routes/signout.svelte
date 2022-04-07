@@ -1,16 +1,13 @@
 <script lang="ts">
+	import { page } from "$app/stores"
 	import { parseHref } from "$lib/conf"
 	import { auth } from "$lib/firebase"
 	import metatags from "$lib/metatags"
 	import { signOut } from "firebase/auth"
-	import { onMount } from "svelte"
 	import { MetaTags } from "svelte-meta-tags"
 
 	let prevLink = "/"
-	onMount(() => {
-		const params = new URLSearchParams(window.location.search)
-		prevLink = params.get("prevLink") || "/"
-	})
+	$: prevLink = $page.url.searchParams.get("prevLink") || "/"
 
 	let signout = signOut(auth)
 </script>

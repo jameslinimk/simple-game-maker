@@ -3,7 +3,7 @@
 	import ConsoleOutput from "$lib/consoleOutput.svelte"
 	import currentProject from "$lib/currentProject"
 	import execute from "$lib/execute"
-	import { deleteUserData, getUserData, updateUserData, userObservable } from "$lib/firebase"
+	import { createProject, deleteUserData, getUserData, updateUserData, userObservable } from "$lib/firebase"
 	import format from "$lib/format"
 	import sGame, { running } from "$lib/game/sGame"
 	import metatags from "$lib/metatags"
@@ -12,6 +12,7 @@
 	import resizeable from "$lib/resizeable"
 	import SaveMenu from "$lib/saveMenu.svelte"
 	import { themeData, themeLightOrDark } from "$lib/themeData"
+	import { esEdition } from "$lib/version"
 	import type { Ace } from "ace-builds"
 	import { onDestroy, onMount } from "svelte"
 	import { MetaTags } from "svelte-meta-tags"
@@ -44,8 +45,7 @@
 		;(<any>editor.session.on)("changeMode", (_: any, session: any) => {
 			session.$worker.send("changeOptions", [
 				{
-					esversion: 9,
-					esnext: false,
+					esversion: esEdition,
 					asi: !currentSemicolons
 				}
 			])
@@ -59,12 +59,31 @@
 	})
 
 	/* --------------------------------- Project -------------------------------- */
+	let warned = false
 	const loadGivenProject = async () => {
-		let params: URLSearchParams
-		try {
-			params = new URLSearchParams(window.location.search)
-		} catch (error) {
-			params = null
+		if ($currentProject) {
+			const [code, error] = await getUserData(`/projects/${$currentProject}`)
+			if (code) {
+				ogCode = code
+				if (editor) editor.session.setValue(code)
+				localStorage.setItem("project", $currentProject)
+				return
+			}
+
+			if (error === "not logged in") {
+				addPopup(`You are not logged in!, please log back in to access this`, "")
+				localStorage.removeItem("project")
+				$currentProject = false
+				return
+			}
+
+			if (!warned) {
+				warned = true
+				addPopup(`Project "${$currentProject}" doesn't exist, loading default project`, "")
+				localStorage.removeItem("project")
+				$currentProject = false
+			}
+			return
 		}
 
 		let localProject: string
@@ -74,7 +93,7 @@
 			localProject = null
 		}
 
-		const project = (params && params.get("project")) || localProject
+		const project = localProject
 
 		if (project) {
 			const [code] = await getUserData(`/projects/${project}`)
@@ -85,6 +104,9 @@
 				if (editor) editor.session.setValue(code)
 
 				localStorage.setItem("project", project)
+			} else if (!warned && project) {
+				warned = true
+				addPopup(`Project "${project}" doesn't exist, loading default project`, "")
 			}
 		}
 
@@ -257,15 +279,40 @@
 					</div>
 				{/if}
 				<div class="flex flex-col">
-					<a
-						href={parseHref("/projects/new")}
-						class="mt-1 bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 opacity-60 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="dark:fill-slate-800 fill-slate-300"
-							><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z" /></svg
+					{#if $currentProject}
+						<a
+							href={parseHref("/projects/new")}
+							class="mt-1 bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 opacity-60 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
 						>
-					</a>
-					<div class="mt-1">New</div>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="24"
+								height="24"
+								viewBox="0 0 24 24"
+								class="dark:fill-slate-800 fill-slate-300"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z" /></svg
+							>
+						</a>
+					{:else}
+						<button
+							on:click={async () => {
+								const [id, error] = await createProject(editor.getValue())
+								if (error) return addPopup("You are not logged in!", "Please login", 1500, "green-600")
+								$currentProject = id
+								localStorage?.setItem("project", id)
+								addPopup("Created and loaded a project", `with an id of "${id}"`)
+							}}
+							class="mt-1 bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 opacity-60 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="24"
+								height="24"
+								viewBox="0 0 24 24"
+								class="dark:fill-slate-800 fill-slate-300"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z" /></svg
+							>
+						</button>
+					{/if}
+					<div class="mt-1">{$currentProject ? "New" : "Save"}</div>
 				</div>
 				{#if $currentProject}
 					<div class="flex flex-col">

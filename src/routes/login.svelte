@@ -1,20 +1,20 @@
 <script lang="ts">
+	import { page } from "$app/stores"
 	import { parseHref } from "$lib/conf"
 	import { auth, generalTests, overrideUserData, projectFuncsTest, userObservable } from "$lib/firebase"
 	import firebaseCodes from "$lib/firebaseCodes"
 	import metatags from "$lib/metatags"
 	import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
-	import { onMount } from "svelte"
 	import { MetaTags } from "svelte-meta-tags"
 
 	let prevLink = "/"
 	let type: "login" | "signup" = "login"
-	onMount(() => {
-		const params = new URLSearchParams(window.location.search)
-		prevLink = params.get("prevLink") || "/"
-		const rawType = params.get("type")
+
+	$: {
+		prevLink = $page.url.searchParams.get("prevLink") || "/"
+		const rawType = $page.url.searchParams.get("type")
 		type = rawType === "signup" || rawType === "login" ? rawType : "login"
-	})
+	}
 
 	let email: string
 	let username: string
