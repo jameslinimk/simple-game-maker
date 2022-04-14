@@ -1,11 +1,11 @@
-import { writable } from "svelte/store"
+import { browser } from "$app/env"
+import { addPopup } from "$lib/popup"
+import type { Writable } from "svelte/store"
+import { get, writable } from "svelte/store"
 
 class sGame {
-	private _running: boolean
-	public get running(): boolean {
-		return this._running
-	}
-	gameLoop?: NodeJS.Timeout
+	running: Writable<boolean>
+	gameLoop?: number
 
 	// Events
 	onFrame: (deltaTime: number) => any
@@ -15,33 +15,42 @@ class sGame {
 	timeLastRound: number
 
 	canvas: HTMLCanvasElement
+
 	constructor() {
-		this._running = false
+		this.running = writable(false)
 
 		this.onFrame = () => {}
 	}
 
 	async start() {
-		this._running = true
-		running.set(true)
-		this.gameLoop = setInterval(() => {
+		if (!browser || !window) return
+		this.running.set(true)
+
+		addPopup("Starting game loop!", "", 1000, "green-600")
+
+		console.log("Creating requestAnimationFrame")
+		const frame = () => {
 			this.timeThisRound = performance.now()
 			this.onFrame((this.timeThisRound - this.timeLastRound) / 10 || 0)
 			this.timeLastRound = this.timeThisRound
-		}, 1000 / 60)
+
+			this.gameLoop = window.requestAnimationFrame(frame)
+		}
+		this.gameLoop = window.requestAnimationFrame(frame)
+		console.log("number", this.gameLoop)
 	}
 
 	stop(reason?: string) {
-		if (!this._running) return
+		if (!browser || !window || !get(this.running)) return
 
-		this._running = false
-		console.log(`Stopping execution${reason ? ` because: "${reason}"` : "!"}`)
-		running.set(false)
-		clearInterval(this.gameLoop)
+		this.running.set(false)
+
+		addPopup("Stopping execution!", reason ? reason : "", 1000)
+
+		window.cancelAnimationFrame(this.gameLoop)
 	}
 }
 
-export const running = writable(false)
 export default new sGame()
 
 export interface Vector2 {

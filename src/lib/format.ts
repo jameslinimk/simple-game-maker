@@ -46,7 +46,10 @@ export const formatCodeExecution = (code: string) => {
 	parsed.body = [loopCheckHead, ...parsed.body]
 
 	const loops = parsed.body.filter((body: any) => loopNames.includes(body.type))
-	loops.forEach((node: any, i: number) => (node.body.body = [...loopCheck(i), ...node.body.body]))
+	loops.forEach((node: any, i: number) => {
+		if (!node.body?.body) return
+		node.body.body = [...loopCheck(i), ...node.body.body]
+	})
 
 	return escodegen.generate(parsed)
 }

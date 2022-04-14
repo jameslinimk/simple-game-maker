@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { parseHref } from "$lib/conf"
+	import { browser } from "$app/env"
+	import { page } from "$app/stores"
 	import ConsoleOutput from "$lib/consoleOutput.svelte"
 	import currentProject from "$lib/currentProject"
 	import execute from "$lib/execute"
 	import { createProject, deleteUserData, getUserData, updateUserData, userObservable } from "$lib/firebase"
 	import format from "$lib/format"
-	import sGame, { running } from "$lib/game/sGame"
+	import sGame from "$lib/game/sGame"
 	import metatags from "$lib/metatags"
 	import OptionMenu from "$lib/optionMenu.svelte"
 	import { addPopup } from "$lib/popup"
 	import resizeable from "$lib/resizeable"
-	import SaveMenu from "$lib/saveMenu.svelte"
 	import { themeData, themeLightOrDark } from "$lib/themeData"
 	import { esEdition } from "$lib/version"
 	import type { Ace } from "ace-builds"
@@ -54,56 +54,61 @@
 		/* -------------------------------------------------------------------------- */
 		/*                                  Resizing                                  */
 		/* -------------------------------------------------------------------------- */
-		resizeable(<HTMLDivElement>document.getElementById("resizer1"), () => editor.resize())
-		resizeable(<HTMLDivElement>document.getElementById("resizer2"), () => editor.resize())
+		const onResize = () => {
+			editor.resize()
+			fitCanvas()
+		}
+
+		resizeable(<HTMLDivElement>document.getElementById("resizer1"), onResize)
+		resizeable(<HTMLDivElement>document.getElementById("resizer2"), onResize)
 	})
 
 	/* --------------------------------- Project -------------------------------- */
 	let warned = false
 	const loadGivenProject = async () => {
+		let paramsProject: string = null
+		try {
+			paramsProject = $page.url.searchParams.get("project")
+		} catch (_) {}
+		if (paramsProject && browser) {
+			$currentProject = paramsProject
+		}
+
 		if ($currentProject) {
-			const [code, error] = await getUserData(`/projects/${$currentProject}`)
-			if (code) {
+			const [code] = await getUserData(`/projects/${$currentProject}`)
+
+			if (code !== null) {
 				ogCode = code
 				if (editor) editor.session.setValue(code)
-				localStorage.setItem("project", $currentProject)
-				return
-			}
-
-			if (error === "not logged in") {
-				addPopup(`You are not logged in!, please log back in to access this`, "")
-				localStorage.removeItem("project")
+				try {
+					localStorage.setItem("project", $currentProject)
+				} catch (_) {}
+			} else {
 				$currentProject = false
-				return
+				try {
+					localStorage.removeItem("project")
+				} catch (_) {}
 			}
-
-			if (!warned) {
-				warned = true
-				addPopup(`Project "${$currentProject}" doesn't exist, loading default project`, "")
-				localStorage.removeItem("project")
-				$currentProject = false
-			}
-			return
 		}
 
-		let localProject: string
+		let localProject: string = null
 		try {
 			localProject = localStorage.getItem("project")
-		} catch (error) {
-			localProject = null
-		}
+		} catch (_) {}
 
 		const project = localProject
 
 		if (project) {
 			const [code] = await getUserData(`/projects/${project}`)
-			if (code) {
+			if (code !== null) {
 				ogCode = code
 
 				$currentProject = project
 				if (editor) editor.session.setValue(code)
 
-				localStorage.setItem("project", project)
+				try {
+					localStorage.setItem("project", project)
+				} catch (_) {}
 			} else if (!warned && project) {
 				warned = true
 				addPopup(`Project "${project}" doesn't exist, loading default project`, "")
@@ -130,20 +135,24 @@
 		document.addEventListener("keydown", (event) => {
 			if (event.code !== "Escape") return
 			if (burgerMenuOpen) burgerMenuOpen = false
-			if (saveMenuOpen) saveMenuOpen = false
 		})
 	)
-
-	let saveMenuOpen = false
 
 	/* ---------------------------------- Theme --------------------------------- */
 	let currentTheme = "one_dark"
 	const toggleTheme = (theme?: string) => {
-		if (!theme) theme = localStorage.getItem("theme")
+		if (!theme) {
+			try {
+				theme = localStorage.getItem("theme")
+			} catch (_) {}
+		}
+		if (!theme) return
 		if (!themeLightOrDark[theme]) return
 
 		if (editor) editor.setTheme(`ace/theme/${theme}`)
-		localStorage.setItem("theme", theme)
+		try {
+			localStorage.setItem("theme", theme)
+		} catch (_) {}
 		currentTheme = theme
 		const mode = themeLightOrDark[theme]
 		if (mode === "light") {
@@ -157,12 +166,18 @@
 	/* ---------------------------------- Font ---------------------------------- */
 	let currentFontSize = 12
 	const changeEditorFontSize = (fontSize?: number) => {
-		if (!fontSize) fontSize = parseInt(localStorage.getItem("fontSize"))
+		if (!fontSize) {
+			try {
+				fontSize = parseInt(localStorage.getItem("fontSize"))
+			} catch (_) {}
+		}
 		if (!fontSize) return
 
 		editor.setOption("fontSize", fontSize)
 		currentFontSize = fontSize
-		localStorage.setItem("fontSize", `${fontSize}`)
+		try {
+			localStorage.setItem("fontSize", `${fontSize}`)
+		} catch (_) {}
 	}
 	$: if (editor) changeEditorFontSize()
 
@@ -170,7 +185,10 @@
 	let currentSemicolons = false
 	const toggleSemicolons = (on?: boolean) => {
 		if (on === undefined) {
-			const localSemicolons = localStorage.getItem("semicolons")
+			let localSemicolons: string = null
+			try {
+				localSemicolons = localStorage.getItem("semicolons")
+			} catch (_) {}
 			if (localSemicolons && (localSemicolons === "true" || localSemicolons === "false")) on = localSemicolons === "true"
 		}
 		if (on === undefined) return
@@ -184,12 +202,16 @@
 		}
 		prettierFormat.semi = on
 		currentSemicolons = on
-		localStorage.setItem("semicolons", `${on}`)
+		try {
+			localStorage.setItem("semicolons", `${on}`)
+		} catch (_) {}
 	}
 	$: if (editor) toggleSemicolons()
 
 	/* ---------------------------------- Other --------------------------------- */
 	let consoleOutputAutoScroll: boolean
+
+	const running = sGame.running
 
 	const play = async () => {
 		if ($running) {
@@ -208,8 +230,6 @@
 		semi: false
 	}
 
-	let deleteConfirm = false
-
 	$: try {
 		if (window) {
 			if (!unsaved) {
@@ -226,6 +246,39 @@
 			}
 		}
 	} catch (error) {}
+
+	let confirmDelete: false | string = false
+
+	const save = () => {
+		if (!$currentProject) return
+		addPopup("Saved!", "Saved the current project!", 1000, "green-600")
+		updateUserData({ [$currentProject]: editor.getValue() }, "/projects")
+		unsaved = false
+		return (ogCode = editor.getValue())
+	}
+
+	onMount(() =>
+		document.addEventListener("keydown", (event) => {
+			if (event.key.toLowerCase() === "s" && (event.ctrlKey || event.metaKey)) {
+				save()
+				event.preventDefault()
+				return false
+			}
+		})
+	)
+
+	const fitCanvas = () => {
+		if (!sGame.canvas || !canvasParent) return
+
+		sGame.canvas.width = canvasParent.clientWidth
+		sGame.canvas.height = canvasParent.clientHeight
+	}
+
+	let canvasParent: HTMLDivElement
+	onMount(() => {
+		fitCanvas()
+		document.addEventListener("resize", fitCanvas)
+	})
 </script>
 
 <MetaTags
@@ -237,7 +290,7 @@
 	})}
 />
 
-<div class="flex flex-1 flex-col">
+<div class="flex flex-grow flex-col">
 	<!-- /* -------------------------------------------------------------------------- */
 	/*                                   TOPBAR                                   */
 	/* -------------------------------------------------------------------------- */ -->
@@ -254,13 +307,7 @@
 				{#if $currentProject}
 					<div class="flex flex-col">
 						<button
-							on:click={() => {
-								if ($currentProject) {
-									addPopup("Saved!", "Saved the current project!", 1000, "green-600")
-									return updateUserData({ [$currentProject]: editor.getValue() }, "/projects")
-								}
-								saveMenuOpen = !saveMenuOpen
-							}}
+							on:click={save}
 							class="mt-1 bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 opacity-60 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" class="p-1.5 dark:fill-slate-800 fill-slate-300" viewBox="0 0 407.096 407.096">
@@ -279,55 +326,41 @@
 					</div>
 				{/if}
 				<div class="flex flex-col">
-					{#if $currentProject}
-						<a
-							href={parseHref("/projects/new")}
-							class="mt-1 bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 opacity-60 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
+					<button
+						on:click={async () => {
+							if (
+								$currentProject &&
+								unsaved &&
+								!confirm(
+									"You have some unsaved work, creating a new project will delte all of your unsaved work!, are you sure you want to continue?"
+								)
+							)
+								return
+
+							const [id, error] = await createProject($currentProject ? "" : editor.getValue())
+							if (error) return addPopup("You are not logged in!", "Please login", 1500, "green-600")
+							if ($currentProject) {
+								editor.session.setValue("")
+								ogCode = ""
+							}
+							$currentProject = id
+							try {
+								localStorage.setItem("project", id)
+							} catch (_) {}
+							addPopup("Created and loaded a project", `with an id of "${id}"`, 3000, "green-600")
+						}}
+						class="mt-1 bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 opacity-60 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="dark:fill-slate-800 fill-slate-300"
+							><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z" /></svg
 						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="24"
-								height="24"
-								viewBox="0 0 24 24"
-								class="dark:fill-slate-800 fill-slate-300"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z" /></svg
-							>
-						</a>
-					{:else}
-						<button
-							on:click={async () => {
-								const [id, error] = await createProject(editor.getValue())
-								if (error) return addPopup("You are not logged in!", "Please login", 1500, "green-600")
-								$currentProject = id
-								localStorage?.setItem("project", id)
-								addPopup("Created and loaded a project", `with an id of "${id}"`)
-							}}
-							class="mt-1 bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 opacity-60 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="24"
-								height="24"
-								viewBox="0 0 24 24"
-								class="dark:fill-slate-800 fill-slate-300"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z" /></svg
-							>
-						</button>
-					{/if}
+					</button>
 					<div class="mt-1">{$currentProject ? "New" : "Save"}</div>
 				</div>
 				{#if $currentProject}
 					<div class="flex flex-col">
 						<button
-							on:click={async () => {
-								if (deleteConfirm) {
-									await deleteUserData(`/projects/${$currentProject}`)
-									addPopup(`Deleted project "${$currentProject}"`, "")
-									$currentProject = false
-									deleteConfirm = false
-								}
-
-								deleteConfirm = true
-								setTimeout(() => (deleteConfirm = false), 2500)
-							}}
+							on:click={() => (confirmDelete = $currentProject)}
 							class="mt-1 bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 opacity-60 hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 grid place-items-center"
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" width="2" viewBox="0 0 24 24" class="w-6 dark:fill-slate-800 fill-slate-300"
@@ -336,19 +369,48 @@
 								/></svg
 							>
 						</button>
-						<div class="mt-1">{!deleteConfirm ? "Delete" : "Confirm?"}</div>
+						<div class="mt-1">Delte</div>
 					</div>
 				{/if}
 			</div>
 		</div>
 	</div>
 
+	{#if confirmDelete}
+		<div
+			in:fade
+			out:fade
+			class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-3 bg-slate-400 shadow-sm shadow-black text-2xl font-semibold rounded-md z-50"
+		>
+			Are you sure you want to <strong>permantly</strong> delete "{confirmDelete}"?
+			<div class="w-full flex justify-center gap-2 mt-1">
+				<button
+					class="bg-green-300 pb-1 pr-1 pl-1 rounded-md shadow-sm shadow-black hover:scale-[1.1] hover:rounded-sm transition-all"
+					on:click={async () => {
+						await deleteUserData(`/projects/${confirmDelete}`)
+						addPopup(`Deleted "${$currentProject}"`, "")
+						$currentProject = false
+						confirmDelete = false
+					}}
+				>
+					Yes, delete {confirmDelete} <strong>forever</strong>
+				</button>
+				<button
+					class="bg-red-500 pb-1 pr-1 pl-1 rounded-md shadow-sm shadow-black hover:scale-[1.1] hover:rounded-sm transition-all"
+					on:click={() => (confirmDelete = false)}
+				>
+					Cancel
+				</button>
+			</div>
+		</div>
+	{/if}
+
 	<!-- /* -------------------------------------------------------------------------- */
 	/*                                    MAIN                                    */
 	/* -------------------------------------------------------------------------- */ -->
-	<div class="flex-1 flex">
+	<div class="flex-grow flex">
 		<div class="w-1/2 relative">
-			<div id="editor" class="no-scrollbar w-full h-full" />
+			<div id="editor" class="w-full h-full" />
 
 			{#if burgerMenuOpen}
 				<OptionMenu
@@ -391,39 +453,31 @@
 				/>
 			{/if}
 
-			{#if saveMenuOpen}
-				<SaveMenu />
-			{/if}
-
 			<div class="absolute flex flex-col top-2 right-2 gap-1 items-end">
 				<button
-					class="bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 relative {burgerMenuOpen || saveMenuOpen
+					class="bg-slate-500 rounded-2xl shadow-sm shadow-black w-8 h-8 relative {burgerMenuOpen
 						? 'opacity-80'
 						: 'opacity-40'} hover:opacity-100 hover:rounded-lg hover:scale-[1.1] transition-all duration-300 group z-20"
 					on:click={() => {
-						if (!saveMenuOpen) burgerMenuOpen = !burgerMenuOpen
-						saveMenuOpen = false
+						burgerMenuOpen = !burgerMenuOpen
 					}}
 				>
 					<div class="block w-5 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
 						<span
 							aria-hidden="true"
-							class="dark:bg-slate-800 bg-slate-300 block absolute h-0.5 w-5 transform group-hover:scale-[1.1] transition-all duration-500 ease-in-out {burgerMenuOpen ||
-							saveMenuOpen
+							class="dark:bg-slate-800 bg-slate-300 block absolute h-0.5 w-5 transform group-hover:scale-[1.1] transition-all duration-500 ease-in-out {burgerMenuOpen
 								? 'rotate-45'
 								: '-translate-y-1.5'}"
 						/>
 						<span
 							aria-hidden="true"
-							class="dark:bg-slate-800 bg-slate-300 block absolute h-0.5 w-5 transform group-hover:scale-[1.1] transition-all duration-500 ease-in-out {burgerMenuOpen ||
-							saveMenuOpen
+							class="dark:bg-slate-800 bg-slate-300 block absolute h-0.5 w-5 transform group-hover:scale-[1.1] transition-all duration-500 ease-in-out {burgerMenuOpen
 								? 'opacity-0'
 								: ''}"
 						/>
 						<span
 							aria-hidden="true"
-							class="dark:bg-slate-800 bg-slate-300 block absolute h-0.5 w-5 transform group-hover:scale-[1.1] transition-all duration-500 ease-in-out {burgerMenuOpen ||
-							saveMenuOpen
+							class="dark:bg-slate-800 bg-slate-300 block absolute h-0.5 w-5 transform group-hover:scale-[1.1] transition-all duration-500 ease-in-out {burgerMenuOpen
 								? '-rotate-45'
 								: 'translate-y-1.5'}"
 						/>
@@ -469,13 +523,16 @@
 			</div>
 		</div>
 
-		<div class="cursor-ew-resize w-2 bg-slate-300 dark:bg-slate-600 z-50" id="resizer1" data-direction="horizontal" />
+		<div class="cursor-ew-resize w-2 bg-slate-300 dark:bg-slate-600 z-30" id="resizer1" data-direction="horizontal" />
 
-		<div style="display: flex; flex: 1 1 0%; flex-direction: column">
-			<div class="bg-slate-100 dark:bg-slate-700 h-3/4 grid place-items-center text-2xl font-semibold text-black dark:text-white">
-				<canvas id="gameCanvas" class="w-full h-full" bind:this={sGame.canvas} />
+		<div class="flex flex-grow flex-col">
+			<div
+				class="bg-slate-100 dark:bg-slate-700 h-3/4 grid place-items-center text-2xl font-semibold text-black dark:text-white"
+				bind:this={canvasParent}
+			>
+				<canvas class="w-full h-full" bind:this={sGame.canvas} />
 			</div>
-			<div id="resizer2" class="h-2 bg-slate-300 dark:bg-slate-600 cursor-ns-resize z-40" data-direction="vertical" />
+			<div id="resizer2" class="h-2 bg-slate-300 dark:bg-slate-600 cursor-ns-resize z-30" data-direction="vertical" />
 			<ConsoleOutput bind:autoScroll={consoleOutputAutoScroll} />
 		</div>
 	</div>
